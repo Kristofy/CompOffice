@@ -2,47 +2,111 @@ generator client {
   provider = "prisma-client-js"
 }
 
+generator markdown {
+  provider = "prisma-markdown"
+  output   = "./ERD.md"
+  title    = "DOCS"
+}
+
 datasource db {
   provider = "sqlserver"
   url      = env("DATABASE_URL")
 }
 
+/// @namespace Banking
+/// Banki fiókok egy adott időpontokban lévő állapota
+///
+/// Power BI reportok és kimutatások készítéséhez szükséges adatok
 model bank_account {
-  id                                       Int                  @id(map: "PK__bank_acc__3213E83FC6E22FC0")
-  amount_HUF                               Float
-  amount                                   Float
+  /// Elsődleges kulcs
+  ///
+  /// @format uuid  
+  id Int @id(map: "PK__bank_acc__3213E83FC6E22FC0")
+
+  /// A bank számla egyenlege forintban  
+  amount_HUF Float
+
+  /// A bank számla egyenlege a `currency` valutában
+  amount Float
+
+  /// A számla valutája
+  ///
+  /// A {@link currency} tábla {@link code} oszlopában felsoorolt valuták közül
   currency                                 String               @db.Char(3)
+
+  /// A számla egyenlegéhez tartozó időpont
   date                                     DateTime             @db.Date
+  
+  /// A számla azonosítója
   account                                  String               @default("MKB_HUF", map: "DF__bank_acco__accou__68336F3E") @db.VarChar(8)
+  
+  /// A számla egyenlege euróban
   amount_EUR                               Float
+  
+  
   bank_account_numbers                     bank_account_numbers @relation(fields: [account], references: [alias], onUpdate: NoAction, map: "fk_bank_account_account")
   currency_bank_account_currencyTocurrency currency             @relation("bank_account_currencyTocurrency", fields: [currency], references: [code], onUpdate: NoAction, map: "fk_bank_account_currency")
 
   @@unique([date, account], map: "uq_bank_account")
 }
 
+/// @namespace Banking
+/// Banki fiókok
+///
+/// Power BI reportok és kimutatások készítéséhez szükséges adatok
 model bank_account_numbers {
+  /// Elsődleges kulcs
+  ///
+  /// A számla azonosítója
+  /// @format uuid
   alias                                            String         @id(map: "PK__bank_acc__8C585C055AF05894") @db.VarChar(8)
+  
+  /// A számlát vezető bank neve
   bank                                             String         @db.VarChar(200)
+  
+  /// A számlához tartozó IBAN szám
   IBAN                                             String         @db.VarChar(100)
+  
+  /// A számla valutája
   currency                                         String         @db.Char(3)
+  
+  
   bank_account                                     bank_account[]
   currency_bank_account_numbers_currencyTocurrency currency       @relation("bank_account_numbers_currencyTocurrency", fields: [currency], references: [code], onUpdate: NoAction, map: "fk_bank_account_numbers_currency")
 
   @@unique([bank, currency], map: "uq_bank_account_numbers")
 }
 
+
+/// @namespace General
+/// Országok
 model country {
+  /// Elsődleges kulcs
+  ///
+  /// Ország kódja
+  /// @format uuid
   code                                             String            @id(map: "PK__country__357D4CF84D3EA2BB") @db.Char(2)
+  
+  /// Ország neve
   name                                             String            @unique(map: "UQ__country__72E12F1B4E0C2A7A") @db.VarChar(100)
+  
+  /// Ország régiója
   region                                           String            @db.VarChar(5)
   region_country_regionToregion                    region            @relation("country_regionToregion", fields: [region], references: [code], onUpdate: NoAction, map: "fk_country_region")
   customer_customer_countryTocountry               customer[]        @relation("customer_countryTocountry")
   pack_unit_event_pack_unit_event_countryTocountry pack_unit_event[] @relation("pack_unit_event_countryTocountry")
 }
 
+
+/// @namespace General
+/// Elfogadott Valuták
 model currency {
+  /// Elsődleges kulcs
+  ///
+  /// Valuta kódja
+  /// @format uuid
   code                                                         String                 @id(map: "PK__currency__357D4CF8B32F5190") @db.Char(3)
+  
   bank_account_bank_account_currencyTocurrency                 bank_account[]         @relation("bank_account_currencyTocurrency")
   bank_account_numbers_bank_account_numbers_currencyTocurrency bank_account_numbers[] @relation("bank_account_numbers_currencyTocurrency")
   currency_exchange_currency_exchange_currencyTocurrency       currency_exchange[]    @relation("currency_exchange_currencyTocurrency")
@@ -50,22 +114,56 @@ model currency {
   order_pack_event                                             order_pack_event[]
 }
 
+/// @namespace General
+/// Valuta árfolyamok az adott időpontban (Cache)
 model currency_exchange {
+  /// Elsődleges kulcs
+  ///
+  /// @format uuid
   id                                            Int      @id(map: "PK__currency__3213E83F5CB9A5FF")
+  
+  /// Egységnyi valuta értéke forintban
   HUFvalue                                      Float
+  
+  /// Az árfolyam érvényessége 
   exchange_date                                 DateTime @db.Date
+  
+  /// Az árfolyam valutája
   currency                                      String   @db.Char(3)
+  
+  
   currency_currency_exchange_currencyTocurrency currency @relation("currency_exchange_currencyTocurrency", fields: [currency], references: [code], onUpdate: NoAction, map: "fk_currency_exchange_currency")
 
   @@unique([exchange_date, currency], map: "uq_currency_exchange")
 }
 
+
+/// @namespace Order
+/// Ügyfelek
+///
+/// A képzési rendszerben szereplő ügyfelek / cégek adatai
 model customer {
+
+  /// Elsődleges kulcs
+  ///
+  /// @format uuid
   id                                                       Int                @id(map: "PK__customer__3213E83F9B2E2E44")
+  
+  /// Ügyfél neve
   name                                                     String?            @db.VarChar(100)
+  
+  /// Ügyfél országa / székhelye
   country                                                  String             @db.Char(2)
+  
+  /// Az ügyfél tevékenységi köre
+  ///
+  /// Meghatározza, hogy milyen iparágban tevékenykedik az ügyfél a {@link industry.id} táblában szereplő iparágak közül
   industry                                                 Int?
+  
+  /// Fizetési határidő
   terms                                                    Int?
+  
+  
   country_customer_countryTocountry                        country            @relation("customer_countryTocountry", fields: [country], references: [code], onUpdate: NoAction, map: "fk_customer_country")
   industry_customer_industryToindustry                     industry?          @relation("customer_industryToindustry", fields: [industry], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_customer_industry")
   customer_contact_customer_contact_customerTocustomer     customer_contact[] @relation("customer_contact_customerTocustomer")
@@ -76,76 +174,199 @@ model customer {
   @@unique([name, country], map: "uq_customer_name_country")
 }
 
+
+/// @namespace Order
+/// Kapcsolattartók
 model customer_contact {
+  /// Elsődleges kulcs
+  ///
+  /// @format uuid
   id                                           Int                @id(map: "PK__customer__3213E83F006EE70F")
+  
+  /// Kapcsolattartó vezetékneve
   last_name                                    String             @db.VarChar(50)
+  
+  /// Kapcsolattartó keresztneve
   first_name                                   String             @db.VarChar(50)
+  
+  /// Kapcsolattartó neve
   display_name                                 String             @unique(map: "UQ__customer__2C575876DC7B6BA3") @db.VarChar(100)
+  
+  /// Kapcsolattartó (publikus) email címe
   email                                        String?            @db.VarChar(100)
+  
+  /// Kapcsolattartó (privát) email címe
   email_private                                String?            @db.VarChar(100)
+  
+  /// Kapcsolattartó telefonszáma
   phone1                                       String?            @db.VarChar(20)
+  
+  /// Kapcsolattartó másodlagos telefonszáma
   phone2                                       String?            @db.VarChar(20)
+  
+  /// A kapcsolattaró munkahelye
   customer                                     Int
+  
+  /// Egyéb megjegyzés
   note                                         String?            @db.VarChar(500)
+  
+  
   customer_customer_contact_customerTocustomer customer           @relation("customer_contact_customerTocustomer", fields: [customer], references: [id], onUpdate: NoAction, map: "fk_customer_contact_customer")
   order_pack_event                             order_pack_event[]
 }
 
+
+/// @namespace General
+/// Cég szintű szabadságok
 model holiday {
+
+  /// Elsődleges kulcs
+  ///
+  /// @format uuid
   id         Int      @id(map: "PK__holiday__3213E83FA4166EF7")
+  
+  /// Szabadság kezdete
   start_date DateTime @db.Date
+  
+  /// Szabadság vége
   end_date   DateTime @db.Date
+  
+  /// Szabadság megnevezése
   title      String?  @db.VarChar(100)
 }
 
+
+/// @namespace Order
+/// Ügyfelek tevékenységi köre
 model industry {
+  /// Elsődleges kulcs
+  ///
+  /// @format uuid
   id                                   Int        @id(map: "PK__industry__3213E83F1D79B624")
+  
+  /// Az iparág neve
   name                                 String?    @unique(map: "UQ__industry__72E12F1BC81CC6A0") @db.VarChar(100)
+  
   customer_customer_industryToindustry customer[] @relation("customer_industryToindustry")
 }
 
+/// @namespace Instructor
+/// Oktatók
 model instructor {
+  
+  /// Elsődleges kulcs
+  ///
+  /// @format uuid
   id                                                                           Int                          @id(map: "PK__instruct__3213E83F6E79C2E1")
+  
+  /// Oktató vezetékneve
   last_name                                                                    String                       @db.VarChar(50)
+  
+  /// Oktató keresztneve
   first_name                                                                   String                       @db.VarChar(50)
+  
+  /// Oktató neve
   display_name                                                                 String                       @unique(map: "UQ__instruct__2C57587681D1EFB1") @db.VarChar(100)
+  
+  /// Oktató (publikus) email címe
   email                                                                        String?                      @db.VarChar(100)
+  
+  /// Oktató (privát) email címe
   email_private                                                                String?                      @db.VarChar(100)
+  
+  /// Oktató telefonszáma
   phone                                                                        String?                      @db.VarChar(20)
+  
+  /// Oktató személyi igazolvány száma
   id_number                                                                    String?                      @db.VarChar(20)
+  
+  /// Az oktató cégének azonosítója
   company                                                                      Int                          @default(1, map: "DF__instructo__compa__7DCDAAA2")
+  
+  /// Az oktató sorszáma a Naptárban
   calendar_index                                                               Int                          @default(1, map: "DF__instructo__calen__7EC1CEDB")
+  
+  
+  
   instructor_company                                                           instructor_company           @relation(fields: [company], references: [id], onUpdate: NoAction, map: "fk_instructor_company")
   instructor_holiday_instructor_holiday_instructorToinstructor                 instructor_holiday[]         @relation("instructor_holiday_instructorToinstructor")
   instructor_pack_unit_event_instructor_pack_unit_event_instructorToinstructor instructor_pack_unit_event[] @relation("instructor_pack_unit_event_instructorToinstructor")
 }
 
+/// @namespace Instructor
+/// Oktatók cégének adatai
 model instructor_company {
+  /// Elsődleges kulcs
+  ///
+  /// @format uuid
   id         Int          @id(map: "PK__instruct__3213E83FA0B8D54C")
+  
+  /// Cég neve
   name       String       @unique(map: "UQ__instruct__72E12F1BD9C014F0") @db.VarChar(100)
   instructor instructor[]
 }
 
+
+/// @namespace Instructor
+/// Oktatók tervezett szabadságai
 model instructor_holiday {
+  /// Elsődleges kulcs
+  ///
+  /// @format uuid
   id                                                   Int        @id(map: "PK__instruct__3213E83F11A3D216")
+  
+  /// Oktató azonosítója
   instructor                                           Int
+  
+  /// Szabadság kezdete
   start_date                                           DateTime   @db.Date
+  
+  /// Szabadság vége
   end_date                                             DateTime   @db.Date
+  
+  /// Szabadság megnevezése
   title                                                String     @default("holiday", map: "DF__instructo__title__79FD19BE") @db.VarChar(100)
+  
+  
   instructor_instructor_holiday_instructorToinstructor instructor @relation("instructor_holiday_instructorToinstructor", fields: [instructor], references: [id], onUpdate: NoAction, map: "fk_instructor_holiday_instructor")
 
   @@unique([instructor, start_date], map: "uq_instrucotr_holiday")
 }
 
+
+/// @namespace Instructor
+/// Oktatók rendelései
+///
+/// Az oktató által tartott megrendelésekhez az oktatóhoz tartozó adatok
 model instructor_pack_unit_event {
+  /// Elsődleges kulcs
+  ///
+  /// @format uuid
   id                                                                                                                       Int                                @id(map: "PK__instruct__3213E83F817743A1")
+  
+  /// Egy projeckt egy kurzusának azonosítója
   pack_unit_event                                                                                                          Int
+  
+  /// Az oktató azonosítója
   instructor                                                                                                               Int
+  
+  /// Az oktató visszaigazolta-e a rendelést
   confirmed                                                                                                                String                             @db.Char(1)
+  
+  // TODO(Kristofy): Pontosítani
+  /// Az oktatásért kapott díj fel van-e számolva
   in_finance_plan                                                                                                          String                             @db.Char(1)
+  
+  /// Az oktatásért kapott díj számlázva van-e 
   invoice                                                                                                                  String                             @db.Char(1)
+  
+  /// Az oktatásért kapott díj teljesítve van-e
   coc                                                                                                                      String                             @db.Char(1)
+  
+  /// Az oktató a kurzus teljes időtartama alatt részt vesz-e
   total                                                                                                                    String                             @db.Char(1)
+  
+  
   instructor_instructor_pack_unit_event_instructorToinstructor                                                             instructor                         @relation("instructor_pack_unit_event_instructorToinstructor", fields: [instructor], references: [id], onUpdate: NoAction, map: "fk_instructor_pack_unit_event_instructor")
   pack_unit_event_instructor_pack_unit_event_pack_unit_eventTopack_unit_event                                              pack_unit_event                    @relation("instructor_pack_unit_event_pack_unit_eventTopack_unit_event", fields: [pack_unit_event], references: [id], onUpdate: NoAction, map: "fk_instructor_pack_unit_event_pack_unit_event")
   instructor_pack_unit_event_dates_instructor_pack_unit_event_dates_instructor_pack_unit_eventToinstructor_pack_unit_event instructor_pack_unit_event_dates[] @relation("instructor_pack_unit_event_dates_instructor_pack_unit_eventToinstructor_pack_unit_event")
@@ -153,101 +374,277 @@ model instructor_pack_unit_event {
   @@unique([pack_unit_event, instructor], map: "uq_instructor_pack_unit_event")
 }
 
+
+/// @namespace Instructor
+/// Oktatók rendelésének időpontjai
+///
+/// Amennyiben oktató nem a teljes időtartamra vesz részt egy kurzuson, akkor az időpontokat itt rögzítjük
 model instructor_pack_unit_event_dates {
+  /// Elsődleges kulcs
+  ///
+  /// @format uuid
   id                                                                                                                 Int                         @id(map: "PK__instruct__3213E83F5429B4C4")
+  
+  /// Az oktató megrendelésének azonosítója
   instructor_pack_unit_event                                                                                         Int?
+  
+  /// A kurzus egy napja melyen az oktató részt vesz
   day                                                                                                                DateTime?                   @db.Date
+  
+  
   instructor_pack_unit_event_instructor_pack_unit_event_dates_instructor_pack_unit_eventToinstructor_pack_unit_event instructor_pack_unit_event? @relation("instructor_pack_unit_event_dates_instructor_pack_unit_eventToinstructor_pack_unit_event", fields: [instructor_pack_unit_event], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_instructor_pack_unit_event_dates")
 
   @@index([day], map: "instructor_pack_unit_event_dates_day_index")
 }
 
+
+/// @namespace Invoice
+/// Számlák
 model invoice {
+  
+  /// Elsődleges kulcs
+  ///
+  /// @format uuid
   id                                         Int            @id(map: "PK__invoice__3213E83F969B4B28")
+  
+  /// Számla száma
   invoice_number                             String         @db.VarChar(200)
+  
+  /// A számla kiállítójának azonosítója
   supplier                                   Int
+  
+  /// A számla valutája
   currency                                   String         @db.Char(3)
+  
+  /// Számla típusának azonosítója
   type                                       Int
+  
+  /// Számlázás dátuma
   invoice_date                               DateTime?      @db.Date
+  
+  /// Kifizetés dátuma
   payment_date                               DateTime?      @db.Date
+  
+  /// Beérkezés dátuma
   delivery_date                              DateTime?      @db.Date
+  
+  /// Átutalás dátuma
   transfer_date                              DateTime?      @db.Date
+  
+  /// TODO(Kristofy): Pontosítani
   actual_report_date                         DateTime?      @db.Date
+  
+  /// Kifizetés státusza
   paid                                       String         @db.Char(1)
+  
+  /// Számla státusza (valós, tervezett)
   status                                     String         @db.Char(1)
+  
+  /// Könyvelt vagy sem
   accounting                                 String         @db.Char(1)
+  
+  /// Megjegyzés
   note                                       String?        @db.VarChar(200)
+  
+  
   currency_invoice_currencyTocurrency        currency       @relation("invoice_currencyTocurrency", fields: [currency], references: [code], onUpdate: NoAction, map: "fk_invoice_currancy")
   supplier_invoice_supplierTosupplier        supplier       @relation("invoice_supplierTosupplier", fields: [supplier], references: [id], onUpdate: NoAction, map: "fk_invoice_supplier")
   invoice_type                               invoice_type   @relation(fields: [type], references: [id], onUpdate: NoAction, map: "fk_invoice_type")
   invoice_line_invoice_line_invoiceToinvoice invoice_line[] @relation("invoice_line_invoiceToinvoice")
 }
 
+
+/// @namespace Invoice
+/// Számla sorok
+///
+/// A számla sorok a számlákhoz tartozó tételek
 model invoice_line {
+  /// Elsődleges kulcs
+  ///
+  /// @format uuid
   id                                             Int               @id(map: "PK__invoice___3213E83F9BACA21D")
+  
+  /// A tétel megnevezése
   title                                          String            @db.VarChar(200)
+  
+  /// Bruttó összeg
   gross                                          Float             @db.Real
+  
+  /// ÁFA (százalékban)
   vat                                            Int
+  
+  /// Nettó összeg
   net                                            Float             @db.Real
+  
+  /// Tétel típusának azonosítója
   type                                           Int
+  
+  /// Egyéb részletek
   details                                        String?           @db.VarChar(1000)
+  
+  /// A számla azonosítója
   invoice                                        Int
+  
+  /// A Projekt azonosítója
   pack_event                                     Int?
+  
+  
   invoice_invoice_line_invoiceToinvoice          invoice           @relation("invoice_line_invoiceToinvoice", fields: [invoice], references: [id], onUpdate: NoAction, map: "fk_invoice_line_invoice")
   pack_event_invoice_line_pack_eventTopack_event pack_event?       @relation("invoice_line_pack_eventTopack_event", fields: [pack_event], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_invoice_line_pack_event")
   invoice_line_type                              invoice_line_type @relation(fields: [type], references: [id], onUpdate: NoAction, map: "fk_invoice_line_type")
 }
 
+
+/// @namespace Invoice
+/// Számla tétel típusok
 model invoice_line_type {
+  /// Elsődleges kulcs
+  ///
+  /// @format uuid
   id                      Int                     @id(map: "PK__invoice___3213E83F74F08EBA")
+  
+  /// Tétel megnevezése
   name                    String?                 @db.VarChar(100)
+  
+  /// Tétel csoportja
   type_group              Int
+  
+  
   invoice_line            invoice_line[]
   invoice_line_type_group invoice_line_type_group @relation(fields: [type_group], references: [id], onUpdate: NoAction, map: "fk_invoice_line_type_group")
 
   @@unique([name, type_group], map: "uq_invoice_line_type_name_group")
 }
 
+/// @namespace Invoice
+/// Számla tétel csoportok
 model invoice_line_type_group {
+  
+  /// Elsődleges kulcs
+  ///
+  /// @format uuid
   id                Int                 @id(map: "PK__invoice___3213E83FBE8E2748")
+  
+  /// Csoport megnevezése
   name              String              @unique(map: "UQ__invoice___72E12F1BB5623922") @db.VarChar(100)
+  
+  
   invoice_line_type invoice_line_type[]
 }
 
+
+/// @namespace Invoice
+/// Számla típusok
 model invoice_type {
+  
+  /// Elsődleges kulcs
+  ///
+  /// @format uuid
   id      Int       @id(map: "PK__invoice___3213E83F83D5F893")
+  
+  /// Típus megnevezése
   name    String    @unique(map: "UQ__invoice___72E12F1B8BBA902F") @db.VarChar(100)
+  
+  
   invoice invoice[]
 }
 
+/// @namespace Order
+/// Adott projekthez tartozó megrendelések
 model order_pack_event {
+  /// Elsődleges kulcs
+  ///
+  /// @format uuid
   id                                                                             Int                     @id(map: "PK__order_pa__3213E83F263F73BA")
+  
+  /// A projekt azonosítója
   pack_event                                                                     Int
+  
+  // A megrendelő cég azonosítója
   customer                                                                       Int
+  
+  /// A számlázandó cég azonosítója
   inv_customer                                                                   Int
+  
+  /// Az ügyfél kapcsolattartójának azonosítója
   contact                                                                        Int?
+  
+  /// A megrendelésből származó várható összeg
+  ///
+  /// A várható összeg a `expected_amount_currency` valutában van megadva
   expected_amount                                                                Float
+  
+  /// A várható összeg valutája
   expected_amount_currency                                                       String                  @db.Char(3)
+  
+  /// A várható összeg áttszámolva forintba
   expected_amount_HUF                                                            Float?
+  
+  /// A várható összeg áttszámolva euróba
   expected_amount_EUR                                                            Float?
+  
+  /// ÁFA mértéke
   vat                                                                            Int?
+  
+  /// Kifizetési időpontja
   payment_date                                                                   DateTime?               @db.Date
+  
+  /// Rendelés időpontja (Kimutatásokhoz)
   actual_report_date                                                             DateTime?               @db.Date
+  
+  /// A rendelés státusza
+  ///
+  /// A megrendelés lehet:
+  /// - Tervezett LEAD
+  /// - Informális INFOR
+  /// - Megrendelt OR
+  /// - Befejezett FIN
+  /// - Törölt CA
   status                                                                         String                  @db.VarChar(5)
+
+  /// Van e hozzá kapcsolódó ajánlat
   qoute                                                                          String                  @db.Char(1)
+  
+  /// Árajánlat
   qoute_number                                                                   String?                 @db.VarChar(50)
+  
+  /// PO státusza
   po                                                                             String                  @db.Char(1)
+  
+  /// PO száma
   po_number                                                                      String?                 @db.VarChar(50)
+  
+  /// Case száma
   case_id                                                                        String?                 @db.VarChar(50)
+  
+  /// Offer száma
   oid                                                                            String?                 @db.VarChar(50)
+  
+  /// FAR státusza
   far                                                                            String                  @db.Char(1)
+  
+  /// számlázás státusza
   invoiced                                                                       String                  @db.Char(1)
+  
+  /// Számla száma
   invoice_number                                                                 String?                 @db.VarChar(50)
+  
+  /// Megjegyzés
   note                                                                           String?                 @db.VarChar(500)
+  
+  /// Kifizetés státusza
   paid                                                                           String                  @default("N", map: "DF__order_pack__paid__5A846E65") @db.Char(1)
+  
+  /// Adott-e a résztvevők email címe
   anonym                                                                         String                  @default("N", map: "DF__order_pac__anony__0A338187") @db.Char(1)
+  
+  /// FAR szükséges-e
   is_far_required                                                                String?                 @db.Char(1)
+  
+  /// QR
   qr_eval                                                                        String?                 @db.Char(1)
+  
+  
   customer_contact                                                               customer_contact?       @relation(fields: [contact], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_order_pack_event_contact")
   currency                                                                       currency                @relation(fields: [expected_amount_currency], references: [code], onUpdate: NoAction, map: "fk_order_pack_event_curreny")
   customer_order_pack_event_customerTocustomer                                   customer                @relation("order_pack_event_customerTocustomer", fields: [customer], references: [id], onUpdate: NoAction, map: "fk_order_pack_event_customer")
@@ -256,57 +653,184 @@ model order_pack_event {
   order_pack_unit_event_order_pack_unit_event_order_pack_eventToorder_pack_event order_pack_unit_event[] @relation("order_pack_unit_event_order_pack_eventToorder_pack_event")
 }
 
+
+/// @namespace Order
+/// Egy projekthez tartozó megrendelési tétel
+///
+/// A megrendelt tétel a projekt kurzusának egy részletét jelenti
+/// Például egy Kubernetes kurzus egy rész egy Docker bevezető képzés
 model order_pack_unit_event {
+  /// Elsődleges kulcs
+  ///
+  /// @format uuid
   id                                                                               Int                 @id(map: "PK__order_pa__3213E83F843571C1")
+
+  /// A megrendelés azonosítója
   order_pack_event                                                                 Int
+  
+  /// A megrendelt tétel azonosítója
   pack_unit_event                                                                  Int
+  
+  /// A megrendelében szereplő résztvevők száma
   participant_number                                                               Int?
+  
+  
   order_pack_event_order_pack_unit_event_order_pack_eventToorder_pack_event        order_pack_event    @relation("order_pack_unit_event_order_pack_eventToorder_pack_event", fields: [order_pack_event], references: [id], onUpdate: NoAction, map: "fk_pack_order_unit_event_order_pack_evnet")
   pack_unit_event_order_pack_unit_event_pack_unit_eventTopack_unit_event           pack_unit_event     @relation("order_pack_unit_event_pack_unit_eventTopack_unit_event", fields: [pack_unit_event], references: [id], onUpdate: NoAction, map: "fk_pack_order_unit_event_pack_unit_event")
   order_participant_order_participant_order_pack_unit_eventToorder_pack_unit_event order_participant[] @relation("order_participant_order_pack_unit_eventToorder_pack_unit_event")
 }
 
+
+/// @namespace Order
+/// A megrendelésben szereplő résztvevők
 model order_participant {
+
+  /// Elsődleges kulcs
+  ///
+  /// @format uuid
   id                                                                                   Int                   @id(map: "PK__order_pa__3213E83F89A7007A")
+  
+  /// Résztvevő azonosítója
   participant                                                                          Int
+  
+  /// A megrendelt tétel azonosítója
   order_pack_unit_event                                                                Int
+  
+  /// Csere esemény azonosítója
+  ///
+  /// Amennyiben a résztvevő nem tud részt venni a kurzuson, akkor a csere esemény azonosítója kerül ide
   replace_event                                                                        Int?
+
+
   order_pack_unit_event_order_participant_order_pack_unit_eventToorder_pack_unit_event order_pack_unit_event @relation("order_participant_order_pack_unit_eventToorder_pack_unit_event", fields: [order_pack_unit_event], references: [id], onUpdate: NoAction, map: "fk_order_participant_order_pack_unit_event")
   pack_unit_event                                                                      pack_unit_event?      @relation(fields: [replace_event], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_order_participant_pack_unit_event")
   participant_order_participant_participantToparticipant                               participant           @relation("order_participant_participantToparticipant", fields: [participant], references: [id], onUpdate: NoAction, map: "fk_order_participant_participant")
 }
 
+
+/// @namespace Services
+/// Csomag
+///
+/// Egy csomag egy kurzus amely több modulból / képzésből áll
 model pack {
+  
+  /// Elsődleges kulcs
+  ///
+  /// @format uuid
   id                                   Int            @id(map: "PK__pack__3213E83FFD465660")
+  
+  /// A csomag kódja
   code                                 String         @unique(map: "UQ__pack__357D4CF989D30D2D") @db.VarChar(50)
+
+  /// A csomag neve
   name                                 String?        @db.VarChar(500)
+  
+  /// A csomag státusza
+  ///
+  /// A csomag lehet:
+  /// - Aktív A
+  /// - Inaktív I
   status                               String         @db.Char(1)
+  
+  /// A csomag lista ára forintban
   list_price_HUF                       Int?
+  
+  /// A csomag lista ára euróban
   list_price_EUR                       Float?
+  
+  /// A csomag téma azonosítója
+  ///
+  /// A csomag témája a {@link topic.id} táblában szereplő témák közül kerül ki
   topic                                Int?
+  
+  /// A csomag típusa
+  ///
+  /// A csomag lehet:
+  /// - Képzés T
+  /// - Szupport S
+  /// - Konzultáció C
   type                                 String         @db.Char(1)
+  
+  
   topic_pack_topicTotopic              topic?         @relation("pack_topicTotopic", fields: [topic], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_pack_topic")
   pack_version_pack_version_packTopack pack_version[] @relation("pack_version_packTopack")
 }
 
+
+/// @namespace Services
+/// Projekt
+///
+/// Egy meghirdetett, megrendelhető kurzus
 model pack_event {
+
+  /// Elsődleges kulcs
+  ///
+  /// @format uuid
   id                                                       Int                @id(map: "PK__pack_eve__3213E83F00B89461")
+
+  /// A Kurzus azonosítója
   pack                                                     Int
+  
+  /// A Projekt státusza
+  ///
+  /// A projekt lehet:
+  /// - folyamatban PR
+  /// - befejezett CL
+  /// - törölt CA
   status                                                   String             @db.Char(2)
+  
+  /// A projekt ára forintban
   price_HUF                                                Int?
+  
+  /// A projekt ára euróban
   price_EUR                                                Float?
+  
+  /// A projekt kezdő dátuma
   start_date                                               DateTime?          @db.Date
+  
+  /// A projekt befejező dátuma
   end_date                                                 DateTime?          @db.Date
+  
+  /// A projektből származó bevétel forintban
   income_HUF                                               Int?
+  
+  /// A projektből származó bevétel euróban
   income_EUR                                               Float?
+  
+  /// A projekt típusa
+  ///
+  /// A projekt lehet:
+  /// - Mindenki számára nyílt képzés OPEN
+  /// - Zárt csoportos képzés CL
+  /// - Csak az írott tananyagot tartalmazó képzés CW
   training_type                                            String             @default("CL", map: "DF__pack_even__train__02925FBF") @db.VarChar(4)
+  
+  /// Az automatikus laborkörnyezet kiépítésének státusza
   labor_status                                             String             @default("N", map: "DF__pack_even__labor__047AA831") @db.Char(1)
+  
+  /// Az automatikus tananyag kiküldés státusza
   courseware_status                                        String             @default("N", map: "DF__pack_even__cours__056ECC6A") @db.Char(1)
+  
+  /// Az automatikus teams csoportok létrehozása és felvételek státusza
   teams_status                                             String             @default("N", map: "DF__pack_even__teams__0662F0A3") @db.Char(1)
+  
+  /// FAR szükséges-e
   is_far_required                                          String?            @db.Char(1)
+  
+  /// QR
   qr_eval                                                  String?            @db.Char(1)
+  
+  /// Az oktató neve
+  ///
+  /// Több oktató esetén "Több oktató"
   instructor_txt                                           String?            @db.VarChar(100)
+  
+  /// A megrendelő cég neve
+  ///
+  /// Több cég esetén "Több cég"
   customer_txt                                             String?            @db.VarChar(100)
+  
+  
   invoice_line_invoice_line_pack_eventTopack_event         invoice_line[]     @relation("invoice_line_pack_eventTopack_event")
   order_pack_event_order_pack_event_pack_eventTopack_event order_pack_event[] @relation("order_pack_event_pack_eventTopack_event")
   pack_version                                             pack_version       @relation(fields: [pack], references: [id], onUpdate: NoAction, map: "fk_pack_event_pack_version")
@@ -315,10 +839,24 @@ model pack_event {
   @@index([training_type], map: "pack_event_training_type_index")
 }
 
+
+/// @namespace Services
+/// Csomagok felépítése
+///
+/// Megadja, hogy egy csomag melyik kurzusokból áll
 model pack_unit {
+  /// Elsődleges kulcs
+  ///
+  /// @format uuid
   id                                                   Int               @id(map: "PK__pack_uni__3213E83F6F9F23B4")
+  
+  /// A csomag megfelelő verziójának azonosítója
   pack                                                 Int
+  
+  /// A modul megfelelő verziójának azonosítója
   unit                                                 Int
+  
+  
   pack_version                                         pack_version      @relation(fields: [pack], references: [id], onUpdate: NoAction, map: "fk_pack_unit_pack_version")
   unit_version                                         unit_version      @relation(fields: [unit], references: [id], onUpdate: NoAction, map: "fk_pack_unit_unit_version")
   pack_unit_event_pack_unit_event_pack_unitTopack_unit pack_unit_event[] @relation("pack_unit_event_pack_unitTopack_unit")
@@ -327,28 +865,93 @@ model pack_unit {
   @@index([pack], map: "pack_unit_pack_index")
 }
 
+
+/// @namespace Services
+/// Egy projekthez tartozó modul
 model pack_unit_event {
+  /// Elsődleges kulcs
+  ///
+  /// @format uuid
   id                                                                                     Int                          @id(map: "PK__pack_uni__3213E83F4DAE202E")
+  
+  /// A Projekt azonosítója
   pack_event                                                                             Int
+  
+  /// A Csomag és a modul azonosítója
   pack_unit                                                                              Int
+  
+  /// A modul státusza
+  ///
+  /// A modul lehet:
+  /// - folyamatban PR
+  /// - befejezett CL
+  /// - törölt CA
   status                                                                                 String                       @db.Char(2)
+  
+  /// A modul kezdő dátuma
   start_date                                                                             DateTime?                    @db.Date
+  
+  /// A modul befejező dátuma
   end_date                                                                               DateTime?                    @db.Date
+  
+  /// Az időpont státusza
+  ///
+  /// Az időpont lehet:
+  /// - hiányzó M
+  /// - tervezett P
+  /// - fix F
   date_status                                                                            String                       @db.Char(1)
+  
+  /// A modul kezdő időpontja lokális idő szerint
   start_time_loc                                                                         DateTime?                    @db.Time
+  
+  /// A modul befejező időpontja lokális idő szerint
   end_time_loc                                                                           DateTime?                    @db.Time
+  
+  /// A modul kezdete az adott napokon HH:MM
   start_time_part                                                                        DateTime?                    @db.Time
+  
+  /// A modul vége az adott napokon HH:MM
   end_time_part                                                                          DateTime?                    @db.Time
+  
+  /// A modul időzónája
+  ///
+  /// Az oktatás ehhez az időzónához igazodik
   timezone                                                                               String?                      @db.VarChar(50)
+  
+  /// A helyszín típusa
+  ///
+  /// A helyszín lehet:
+  /// - Online On
+  /// - Az oktató cégnél Com
+  /// - Ügyfélnél Cu
   place_type                                                                             String                       @db.VarChar(5)
+  
+  /// Az oktatás országa (ha az oktatás helyszíne az ügyfél cégénél van)
   country                                                                                String?                      @db.Char(2)
+  
+  /// Az oktatás városa (ha az oktatás helyszíne az ügyfél cégénél van)
   city                                                                                   String?                      @db.VarChar(100)
+
+  /// Az oktatás nyelve
   language                                                                               String                       @db.VarChar(3)
+  
+  /// Az oktatásra jelentkezett résztvevők száma
   participant_number                                                                     Int?
+  
+  /// Félnapos oktatás esetén a naprész (AM, PM, FULL)
   daypart                                                                                String                       @default("FULL", map: "DF__pack_unit__daypa__7814D14C") @db.VarChar(4)
+  
+  /// Megjegyzések
   notes                                                                                  String?                      @db.VarChar(500)
+  
+  /// Az időzóna különbsége a magyar időzónához képest
   timezone_diff                                                                          Float?
+  
+  /// Az oktatandó ügyfelek a Szombat - Vasárnapot tekintik hétvégeknek
   is_traditional_weekend                                                                 String                       @db.Char(1)
+
+
   instructor_pack_unit_event_instructor_pack_unit_event_pack_unit_eventTopack_unit_event instructor_pack_unit_event[] @relation("instructor_pack_unit_event_pack_unit_eventTopack_unit_event")
   order_pack_unit_event_order_pack_unit_event_pack_unit_eventTopack_unit_event           order_pack_unit_event[]      @relation("order_pack_unit_event_pack_unit_eventTopack_unit_event")
   order_participant                                                                      order_participant[]
@@ -363,12 +966,35 @@ model pack_unit_event {
   @@index([status], map: "pack_unit_event_status_index")
 }
 
+
+/// @namespace Services
+/// Csomagok verziói
+///
+/// Egy csomagnak létehzet több verziója
+/// Ezekhez különböző laborkörnyezet és tananyag is tartozhat
 model pack_version {
+  
+  /// Elsődleges kulcs
+  ///
+  /// @format uuid
   id                           Int          @id(map: "PK__pack_ver__3213E83FF02A6A71")
+  
+  /// A csomag azonosítója
   pack                         Int
+  
+  /// A csomag verziója
   version                      String       @default("", map: "DF__pack_vers__versi__2B947552") @db.VarChar(10)
+  
+  /// Az alapértelmezett verzió
+  ///
+  /// Amennyiben több verzió is létezik, akkor az alapértelmezett verzió az amelyiket ajánljuk, az újabb projekteket tipikusan ezzel a verzióval hozzuk létre
   is_default                   String       @default("N", map: "DF__pack_vers__is_de__2C88998B") @db.Char(1)
+
+  /// publikálva van-e, ha nem akkor vagy megszűnt vagy fejlesztés alatt van
   published                    String       @default("Y", map: "DF__pack_vers__publi__2D7CBDC4") @db.Char(1)
+  
+  
+  
   pack_event                   pack_event[]
   pack_unit                    pack_unit[]
   pack_pack_version_packTopack pack         @relation("pack_version_packTopack", fields: [pack], references: [id], onUpdate: NoAction, map: "fk_pack_version_pack")
@@ -376,27 +1002,65 @@ model pack_version {
   @@unique([pack, version], map: "uq_pack_version")
 }
 
+
+/// @namespace Order
+/// Ügyfelek
 model participant {
+  /// Elsődleges kulcs
+  ///
+  /// @format uuid
   id                                                           Int                 @id(map: "PK__particip__3213E83F88812D4E")
+  
+  /// Az ügyfél email címe (Ide kapják meg a kurzus információkat és az írott tananyagot)
   email                                                        String              @unique(map: "uq_participant") @db.VarChar(200)
+  
+  /// Az ügyfél neve
   name                                                         String              @db.VarChar(200)
+
+  /// Az ügyfél jelenlegi cégének azonosítója
   customer                                                     Int?
+  
+  
   order_participant_order_participant_participantToparticipant order_participant[] @relation("order_participant_participantToparticipant")
   customer_participant_customerTocustomer                      customer?           @relation("participant_customerTocustomer", fields: [customer], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_participant_customer")
 }
 
+
+/// @namespace General
+/// Régiók
 model region {
+  
+  /// Elsődleges kulcs
+  ///
+  /// A régió kódja
+  /// @format uuid
   code                           String    @id(map: "PK__region__357D4CF803D13338") @db.VarChar(5)
+  
+  /// A régió neve
   name                           String    @unique(map: "UQ__region__72E12F1BFE11D2B4") @db.VarChar(50)
   country_country_regionToregion country[] @relation("country_regionToregion")
 }
 
+
+/// @namespace Invoice
+/// A számlát kiállító entitások
 model supplier {
+
+  /// Elsődleges kulcs
+  ///
+  /// @format uuid
   id                                 Int       @id(map: "PK__supplier__3213E83F74041355")
+  
+  /// A számla kiállítójának neve
   name                               String    @unique(map: "UQ__supplier__72E12F1B9B136983") @db.NVarChar(200)
+  
+  
   invoice_invoice_supplierTosupplier invoice[] @relation("invoice_supplierTosupplier")
 }
 
+
+/// MS SQL Server specific table
+/// @hidden
 model sysdiagrams {
   name         String @db.NVarChar(128)
   principal_id Int
@@ -407,48 +1071,105 @@ model sysdiagrams {
   @@unique([principal_id, name], map: "UK_principal_name")
 }
 
-/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
-model szabolcs {
-  id     Int?
-  szoveg String @db.NVarChar(200)
-
-  @@ignore
-}
-
-model test_table {
-  id Int  @id(map: "pk_id")
-  i  Int?
-}
-
+/// @namespace Services
+/// Képzési témák
 model topic {
+  
+  /// Elsődleges kulcs
+  ///
+  /// @format uuid
   id                     Int    @id(map: "PK__topic__3213E83FCDC354C7")
+  
+  /// A téma megnevezése
   name                   String @unique(map: "UQ__topic__72E12F1BE37EEC60") @db.VarChar(150)
+  
+  
   pack_pack_topicTotopic pack[] @relation("pack_topicTotopic")
   unit_unit_topicTotopic unit[] @relation("unit_topicTotopic")
 }
 
+
+/// @namespace Services
+/// Modulok
+///
+/// Egy modul egy önmagában is oktatható képzési egység
 model unit {
+
+  /// Elsődleges kulcs
+  ///
+  /// @format uuid
   id                                   Int            @id(map: "PK__unit__3213E83F95AF58EB")
+  
+  /// A modul kódja
   code                                 String         @unique(map: "UQ__unit__357D4CF90F552E7A") @db.VarChar(50)
+  
+  /// A modul neve
   name                                 String?        @db.VarChar(500)
+  
+  /// A modul státusza
+  ///
+  /// A modul lehet:
+  /// - Aktív A
+  /// - Inaktív I
   status                               String         @db.Char(1)
+  
+  /// A modul típusa
+  ///
+  /// A modul lehet:
+  /// - Képzés T
+  /// - Szupport S
+  /// - Konzultáció C
   type                                 String         @db.Char(1)
+
+  /// A modul témája
+  ///
+  /// A modul témája a {@link topic.id} táblában szereplő témák közül kerül ki
   topic                                Int?
+  
+  /// A modul lista ára forintban
   list_price_HUF                       Int?
+  
+  /// A modul lista ára euróban
   list_price_EUR                       Float?
+  
+  /// A modul időtartama (napokban)
   length                               Float?
+  
+
+
   topic_unit_topicTotopic              topic?         @relation("unit_topicTotopic", fields: [topic], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_unit_topic")
   unit_version_unit_version_unitTounit unit_version[] @relation("unit_version_unitTounit")
 
   @@index([type], map: "unit_type_index")
 }
 
+
+/// @namespace Services
+/// Modulok verziói
+///
+/// Egy modulnak létezhet több verziója
+/// Ezekhez különböző laborkörnyezet és tananyag is tartozhat
 model unit_version {
+  /// Elsődleges kulcs
+  ///
+  /// @format uuid
   id                           Int         @id(map: "PK__unit_ver__3213E83F5981DD6A")
+  
+  /// A modul azonosítója
   unit                         Int
+  
+  /// A modul verziója
   version                      String      @default("", map: "DF__unit_vers__versi__22FF2F51") @db.VarChar(10)
+  
+  /// Az alapértelmezett verzió 
+  ///
+  /// Amennyiben több verzió is létezik, akkor az alapértelmezett verzió az amelyiket ajánljuk, az újabb projekteket tipikusan ezzel a verzióval hozzuk létre
   is_default                   String      @default("N", map: "DF__unit_vers__is_de__23F3538A") @db.Char(1)
+
+  /// publikálva van-e, ha nem akkor vagy megszűnt vagy fejlesztés alatt van
   published                    String      @default("Y", map: "DF__unit_vers__publi__24E777C3") @db.Char(1)
+  
+  
   pack_unit                    pack_unit[]
   unit_unit_version_unitTounit unit        @relation("unit_version_unitTounit", fields: [unit], references: [id], onUpdate: NoAction, map: "fk_unit_version_unit")
 

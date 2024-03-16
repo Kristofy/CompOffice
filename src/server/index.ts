@@ -6,7 +6,12 @@ export const appRouter = router({
         return "Hello, World!";
     }),
     getUnits: publicProcedure.query(async () => {
-        return prisma.unit.findMany({take: 10})
+        // sort
+        return prisma.instructor_pack_unit_event.findMany({
+            orderBy: {
+                total: 'desc',
+            },
+        });
     }),
 });
 
