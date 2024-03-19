@@ -4,8 +4,8 @@ generator client {
 
 generator markdown {
   provider = "prisma-markdown"
-  output   = "./ERD.md"
-  title    = "DOCS"
+  output   = "../wiki/dev/database.md"
+  title    = "CompOffice Database"
 }
 
 datasource db {

@@ -5,10 +5,15 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "test": "cucumber-js",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "docs-prisma": "prisma generate --generator markdown",
+    "docs-story": "echo Converting features into md && echo '' && find features/ -type f -name \"*.feature\" | xargs -I{} zsh -c 'gherkin2markdown \"{}\" \"wiki/dev/$(basename \"{}\")\" &>/dev/null && echo \"\\033[0;32mOK\\033[0m:\\t{}\" || (echo \"\\033[0;31mERROR\\033[0m:\\t{}\")'"
+
   },
   "dependencies": {
+    "@cucumber/cucumber": "^10.3.1",
     "@prisma/client": "^5.11.0",
     "@tanstack/react-query": "^4.36.1",
     "@trpc/client": "^10.45.2",
