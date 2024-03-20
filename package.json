@@ -9,8 +9,11 @@
     "start": "next start",
     "lint": "next lint",
     "docs-prisma": "prisma generate --generator markdown",
-    "docs-story": "echo Converting features into md && echo '' && find features/ -type f -name \"*.feature\" | xargs -I{} zsh -c 'gherkin2markdown \"{}\" \"wiki/dev/$(basename \"{}\")\" &>/dev/null && echo \"\\033[0;32mOK\\033[0m:\\t{}\" || (echo \"\\033[0;31mERROR\\033[0m:\\t{}\")'"
-
+    "docs-story": "echo Converting features into md && echo '' && find features/ -type f -name \"*.feature\" | xargs -I{} zsh -c 'gherkin2markdown \"{}\" \"wiki/dev/$(basename \"{}\")\" &>/dev/null && echo \"\\033[0;32mOK\\033[0m:\\t{}\" || (echo \"\\033[0;31mERROR\\033[0m:\\t{}\")'",
+    "docs-merge": "python tools/md_merge.py -o wiki/wiki.md wiki/docs.md",
+    "docs-md": "npm run docs-prisma && npm run docs-story && npm run docs-merge",
+    "docs-pdf": "cd wiki && pandoc wiki.md -F mermaid-filter --template eisvogel -V linkcolor=blue -V header-includes:'\\usepackage[export]{adjustbox} \\let\\includegraphicsbak\\includegraphics \\renewcommand*{\\includegraphics}[2][]{\\includegraphicsbak[frame,#1]{#2}}' -o wiki.pdf",
+    "docs": "npm run docs-md && npm run docs-pdf"
   },
   "dependencies": {
     "@cucumber/cucumber": "^10.3.1",
