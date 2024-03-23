@@ -26,13 +26,20 @@ erDiagram
   String IBAN
   String currency FK
 }
-"bank_account" }o--|| "bank_account_numbers" : bank_account_numbers
+"currency" {
+  String code PK
+}
+"bank_account" }o--|| "bank_account_numbers" : bank_account_numbers_fields
+"bank_account" }o--|| "currency" : currency_field
+"bank_account_numbers" }o--|| "currency" : currency_field
 ```
 
 ### `bank_account`
 Banki fiókok egy adott időpontokban lévő állapota
 
 Power BI reportok és kimutatások készítéséhez szükséges adatok
+
+A (`data`, `account`) páros egyedi
 
 **Properties**
   - `id`: Elsődleges kulcs
@@ -50,6 +57,8 @@ Power BI reportok és kimutatások készítéséhez szükséges adatok
 Banki fiókok
 
 Power BI reportok és kimutatások készítéséhez szükséges adatok
+
+A (`bank`, `currency`) páros egyedi
 
 **Properties**
   - `alias`
@@ -88,8 +97,8 @@ erDiagram
   String code PK
   String name UK
 }
-"country" }o--|| "region" : region_country_regionToregion
-"currency_exchange" }o--|| "currency" : currency_currency_exchange_currencyTocurrency
+"country" }o--|| "region" : region_field
+"currency_exchange" }o--|| "currency" : currency_field
 ```
 
 ### `country`
@@ -115,6 +124,8 @@ Elfogadott Valuták
 ### `currency_exchange`
 Valuta árfolyamok az adott időpontban (Cache)
 
+A (`exchange_date`, `currency`) páros egyedi
+
 **Properties**
   - `id`: Elsődleges kulcs
   - `HUFvalue`: Egységnyi valuta értéke forintban
@@ -132,6 +143,10 @@ Cég szintű szabadságok
 
 ### `region`
 Régiók
+
+Régió mint nagyobb földrajzi egység Például közép-európa
+
+A `name` mező egyedi
 
 **Properties**
   - `code`
@@ -214,21 +229,23 @@ erDiagram
   String name
   Int customer FK "nullable"
 }
-"customer" }o--o| "industry" : industry_customer_industryToindustry
-"customer_contact" }o--|| "customer" : customer_customer_contact_customerTocustomer
-"order_pack_event" }o--o| "customer_contact" : customer_contact
-"order_pack_event" }o--|| "customer" : customer_order_pack_event_customerTocustomer
-"order_pack_event" }o--|| "customer" : customer_order_pack_event_inv_customerTocustomer
-"order_pack_unit_event" }o--|| "order_pack_event" : order_pack_event_order_pack_unit_event_order_pack_eventToorder_pack_event
-"order_participant" }o--|| "order_pack_unit_event" : order_pack_unit_event_order_participant_order_pack_unit_eventToorder_pack_unit_event
-"order_participant" }o--|| "participant" : participant_order_participant_participantToparticipant
-"participant" }o--o| "customer" : customer_participant_customerTocustomer
+"customer" }o--o| "industry" : industry_field
+"customer_contact" }o--|| "customer" : customer_field
+"order_pack_event" }o--o| "customer_contact" : customer_contact_field
+"order_pack_event" }o--|| "customer" : customer_fields
+"order_pack_event" }o--|| "customer" : inv_customer_fields
+"order_pack_unit_event" }o--|| "order_pack_event" : order_pack_event_field
+"order_participant" }o--|| "order_pack_unit_event" : order_pack_unit_event_field
+"order_participant" }o--|| "participant" : participant_field
+"participant" }o--o| "customer" : customer_fields
 ```
 
 ### `customer`
 Ügyfelek
 
 A képzési rendszerben szereplő ügyfelek / cégek adatai
+
+A (`name`, `country`) páros egyedi
 
 **Properties**
   - `id`: Elsődleges kulcs
@@ -380,10 +397,10 @@ erDiagram
   Int instructor_pack_unit_event FK "nullable"
   DateTime day "nullable"
 }
-"instructor" }o--|| "instructor_company" : instructor_company
-"instructor_holiday" }o--|| "instructor" : instructor_instructor_holiday_instructorToinstructor
-"instructor_pack_unit_event" }o--|| "instructor" : instructor_instructor_pack_unit_event_instructorToinstructor
-"instructor_pack_unit_event_dates" }o--o| "instructor_pack_unit_event" : instructor_pack_unit_event_instructor_pack_unit_event_dates_instructor_pack_unit_eventToinstructor_pack_unit_event
+"instructor" }o--|| "instructor_company" : company_field
+"instructor_holiday" }o--|| "instructor" : instructor_field
+"instructor_pack_unit_event" }o--|| "instructor" : instructor_field
+"instructor_pack_unit_event_dates" }o--o| "instructor_pack_unit_event" : instructor_pack_unit_event_field
 ```
 
 ### `instructor`
@@ -404,12 +421,16 @@ Oktatók
 ### `instructor_company`
 Oktatók cégének adatai
 
+A `name` egyedi
+
 **Properties**
   - `id`: Elsődleges kulcs
   - `name`: Cég neve
 
 ### `instructor_holiday`
 Oktatók tervezett szabadságai
+
+A (`instructor`, `start_date`) páros egyedi
 
 **Properties**
   - `id`: Elsődleges kulcs
@@ -422,6 +443,8 @@ Oktatók tervezett szabadságai
 Oktatók rendelései
 
 Az oktató által tartott megrendelésekhez az oktatóhoz tartozó adatok
+
+A (`pack_unit_event`, `instructor`) páros egyedi
 
 **Properties**
   - `id`: Elsődleges kulcs
@@ -491,11 +514,11 @@ erDiagram
   Int id PK
   String name UK
 }
-"invoice" }o--|| "supplier" : supplier_invoice_supplierTosupplier
-"invoice" }o--|| "invoice_type" : invoice_type
-"invoice_line" }o--|| "invoice" : invoice_invoice_line_invoiceToinvoice
-"invoice_line" }o--|| "invoice_line_type" : invoice_line_type
-"invoice_line_type" }o--|| "invoice_line_type_group" : invoice_line_type_group
+"invoice" }o--|| "supplier" : supplier_field
+"invoice" }o--|| "invoice_type" : invoice_type_field
+"invoice_line" }o--|| "invoice" : invoice_field
+"invoice_line" }o--|| "invoice_line_type" : invoice_line_type_field
+"invoice_line_type" }o--|| "invoice_line_type_group" : invoice_line_type_group_field
 ```
 
 ### `invoice`
@@ -536,6 +559,8 @@ A számla sorok a számlákhoz tartozó tételek
 ### `invoice_line_type`
 Számla tétel típusok
 
+A (`name`, `type_group`) páros egyedi
+
 **Properties**
   - `id`: Elsődleges kulcs
   - `name`: Tétel megnevezése
@@ -557,6 +582,8 @@ Számla típusok
 
 ### `supplier`
 A számlát kiállító entitások
+
+A `name` mező egyedi
 
 **Properties**
   - `id`: Elsődleges kulcs
@@ -652,15 +679,15 @@ erDiagram
   String is_default
   String published
 }
-"pack" }o--o| "topic" : topic_pack_topicTotopic
-"pack_event" }o--|| "pack_version" : pack_version
-"pack_unit" }o--|| "pack_version" : pack_version
-"pack_unit" }o--|| "unit_version" : unit_version
-"pack_unit_event" }o--|| "pack_event" : pack_event_pack_unit_event_pack_eventTopack_event
-"pack_unit_event" }o--|| "pack_unit" : pack_unit_pack_unit_event_pack_unitTopack_unit
-"pack_version" }o--|| "pack" : pack_pack_version_packTopack
-"unit" }o--o| "topic" : topic_unit_topicTotopic
-"unit_version" }o--|| "unit" : unit_unit_version_unitTounit
+"pack" }o--o| "topic" : topic_field
+"pack_event" }o--|| "pack_version" : pack_version_field
+"pack_unit" }o--|| "pack_version" : pack_version_field
+"pack_unit" }o--|| "unit_version" : unit_version_field
+"pack_unit_event" }o--|| "pack_event" : pack_event_field
+"pack_unit_event" }o--|| "pack_unit" : pack_unit_field
+"pack_version" }o--|| "pack" : pack_field
+"unit" }o--o| "topic" : topic_field
+"unit_version" }o--|| "unit" : unit_field
 ```
 
 ### `pack`
@@ -735,9 +762,11 @@ Egy meghirdetett, megrendelhető kurzus
     > Több cég esetén "Több cég"
 
 ### `pack_unit`
-Csomagok felépítése
+Csomagok felépítése (Kapcsoló tábla)
 
 Megadja, hogy egy csomag melyik kurzusokból áll
+
+A (`pack`, `unit`) páros egyedi
 
 **Properties**
   - `id`: Elsődleges kulcs
@@ -797,6 +826,8 @@ Csomagok verziói
 Egy csomagnak létehzet több verziója
 Ezekhez különböző laborkörnyezet és tananyag is tartozhat
 
+A (`pack`, `version`) páros egyedi
+
 **Properties**
   - `id`: Elsődleges kulcs
   - `pack`: A csomag azonosítója
@@ -809,6 +840,8 @@ Ezekhez különböző laborkörnyezet és tananyag is tartozhat
 
 ### `topic`
 Képzési témák
+
+A `name` mező egyedi
 
 **Properties**
   - `id`: Elsődleges kulcs
@@ -849,6 +882,8 @@ Modulok verziói
 
 Egy modulnak létezhet több verziója
 Ezekhez különböző laborkörnyezet és tananyag is tartozhat
+
+A (`unit`, `version`) páros egyedi
 
 **Properties**
   - `id`: Elsődleges kulcs

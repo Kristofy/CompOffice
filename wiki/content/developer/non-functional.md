@@ -40,23 +40,29 @@
 
 ### 3.2.6 Szükséges erőforrások
 
-- **Hardveres erőforrások**:
-  - Az alkalmazás kliens oldala egy átlagos számítógépen is futtatható.  
-  - Az alkalmazás szerver oldala egy átlagos szerveren is futtatható.  
-  - Fejlesztés alatt a gyors fejlesztéshez egy erősebb számítógép ajánlott 8+ GB rammal és 4+ magos processzorral.  
+**Hardveres erőforrások**:  
 
-- **Szoftveres erőforrások**:
-  - Az alkalmazás kliens oldala egy átlagos böngészőn futtatható.   
-  - Az alkalmazás szerver oldala egy átlagos linux szerveren futtatható.   
-  - Fejlesztés alatt a package.json-ben devDependencies-ben megadott szoftverek szükségesek, valamint egyéb csomagok ezek:   
-    - git, nodejs, npm, pandoc, go, python3, texlive latex csomagok    
-    - fejlesztői környezet, lehetőleg ami integrálja a formázó és lintelő eszközöket pl.: VSCode vagy nvim   
-  - Adatbázis szerver
 
-- **Üzemeltetés és karbantartás**:
-  - Az karbantartáshoz egy naplózó rendszer beüzemelése előnyös de nem szükséges
-  - Az üzemeltetés a számítógép költségén kívül nem igényel egyéb költséget.  
-  - A karbantartás egyszerűsíttése a dolgozatom egyik fő célja. Reményeim szerint az erre fordíttandó költéségek minimálisak lesznek.  
+- Az alkalmazás kliens oldala egy átlagos számítógépen is futtatható.  
+- Az alkalmazás szerver oldala egy átlagos szerveren is futtatható.  
+- Fejlesztés alatt a gyors fejlesztéshez egy erősebb számítógép ajánlott 8+ GB rammal és 4+ magos processzorral.  
+
+**Szoftveres erőforrások**:  
+
+
+- Az alkalmazás kliens oldala egy átlagos böngészőn futtatható.   
+- Az alkalmazás szerver oldala egy átlagos linux szerveren futtatható.   
+- Fejlesztés alatt a package.json-ben devDependencies-ben megadott szoftverek szükségesek, valamint egyéb csomagok ezek:   
+  - git, nodejs, npm, pandoc, go, python3, texlive latex csomagok    
+  - fejlesztői környezet, lehetőleg ami integrálja a formázó és lintelő eszközöket pl.: VSCode vagy nvim   
+- Adatbázis szerver
+
+**Üzemeltetés és karbantartás**:  
+
+
+- Az karbantartáshoz egy naplózó rendszer beüzemelése előnyös de nem szükséges
+- Az üzemeltetés a számítógép költségén kívül nem igényel egyéb költséget.  
+- A karbantartás egyszerűsíttése a dolgozatom egyik fő célja. Reményeim szerint az erre fordíttandó költéségek minimálisak lesznek.  
 
 ### 3.2.7 Megvalósíttás és használt technológiák
 

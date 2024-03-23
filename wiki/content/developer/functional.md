@@ -49,5 +49,3 @@ A rendszernek a következő funkciókat, reakciókat kell tudnia biztosítani.
 [{(user-stories.md)}]
 
 
-
-

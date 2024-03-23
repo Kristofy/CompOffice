@@ -10,7 +10,7 @@ titlepage: true,
 titlepage-text-color: "424242"
 titlepage-rule-color: "360049"
 titlepage-rule-height: 0
-...
+---
 
 # Szakdolgozat
 
@@ -184,12 +184,16 @@ A Dokumentáció felépíttése a kódbázisból a következőként történik:
 
 ### 3.2.6 Szükséges erőforrások
 
-- **Hardveres erőforrások**:
+**Hardveres erőforrások**:
+
+
 - Az alkalmazás kliens oldala egy átlagos számítógépen is futtatható.
 - Az alkalmazás szerver oldala egy átlagos szerveren is futtatható.
 - Fejlesztés alatt a gyors fejlesztéshez egy erősebb számítógép ajánlott 8+ GB rammal és 4+ magos processzorral.
 
-- **Szoftveres erőforrások**:
+**Szoftveres erőforrások**:
+
+
 - Az alkalmazás kliens oldala egy átlagos böngészőn futtatható.
 - Az alkalmazás szerver oldala egy átlagos linux szerveren futtatható.
 - Fejlesztés alatt a package.json-ben devDependencies-ben megadott szoftverek szükségesek, valamint egyéb csomagok ezek:
@@ -197,7 +201,9 @@ A Dokumentáció felépíttése a kódbázisból a következőként történik:
 - fejlesztői környezet, lehetőleg ami integrálja a formázó és lintelő eszközöket pl.: VSCode vagy nvim
 - Adatbázis szerver
 
-- **Üzemeltetés és karbantartás**:
+**Üzemeltetés és karbantartás**:
+
+
 - Az karbantartáshoz egy naplózó rendszer beüzemelése előnyös de nem szükséges
 - Az üzemeltetés a számítógép költségén kívül nem igényel egyéb költséget.
 - A karbantartás egyszerűsíttése a dolgozatom egyik fő célja. Reményeim szerint az erre fordíttandó költéségek minimálisak lesznek.
@@ -563,21 +569,1129 @@ end
 
 ### 3.3.4 User-Story-k
 
+\footnotesize
+
+### A felhasználó be tud lépni az alkalmazásba
 
 
-# Itt wannak a user storyk::
+
+**A felhasználó bejelentkezik**
+
+_Given_ A felhasználó fiókja Azure AD-ben megengedett
+
+_When_ Oldal látogatása
+
+_Then_ Automatikus bejelentkeztetés.
+
+
+**A felhasználó nem jelentkezhet be**
+
+_Given_ A felhasználó fiókja Azure AD-ben nem megengedett
+
+_When_ Oldal látogatása
+
+_Then_ Az oldal visszautasítja a bejelentkezést.
+
+
+**A bejelentkezett felhasználó a főoldalra kerül**
+
+_Given_ A felhasználó bejelentkezett
+
+_When_ Oldal látogatása
+
+_Then_ A főoldalra kerül.
+
+
+**A bejelentkezett felhasználó kijelentkezik**
+
+_Given_ A felhasználó bejelentkezett
+
+_When_ Kijelentkezés
+
+_Then_ A bejelentkező oldalra kerül.
+
+
+**A felhasználónak megfeleő jogosultságai vannak**
+
+_Given_ A felhasználó bejelentkezett
+
+_When_ Oldal látogatása
+
+_Then_ A felhasználó megfelelő jogosultságokkal rendelkezik.
 
 
 
-# Sanity Check
-
-## I am a user
-
-_Given_ I have 42 cucumbers in my belly
-
-_Then_ The result is 42.
+### Általános műveletek nem lehetségesek a megfelelő jogosultság nélkü
 
 
+
+**Az oldal nem tölt be adatot, és hibát ad, ha a felhasználó megfelelő jogosultság nélkül látogat egy oldalt**
+
+_Given_ A felhasználó bejelentkezett
+
+_When_ A oldal látogatása AND A felhasználónak nincs megtekintés jogosultsága az A oldalhoz
+
+_Then_ Az oldal nem tölt be adatot, és hibát ad.
+
+
+**Az oldalakon nem módosíthat jogosultság nélkül**
+
+_Given_ A felhasználó bejelentkezett
+
+_When_ A oldal látogatása AND A felhasználónak nincs módosítás jogosultsága az A oldalhoz
+
+_Then_ Az oldalakon nem módosíthat.
+
+
+**Az oldalakon nem törölhet jogosultság nélkül**
+
+_Given_ A felhasználó bejelentkezett
+
+_When_ A oldal látogatása AND A felhasználónak nincs törlés jogosultsága az A oldalhoz
+
+_Then_ Az oldalakon nem törölhet.
+
+
+**Az oldalakon nem hozzáadhat jogosultság nélkül**
+
+_Given_ A felhasználó bejelentkezett
+
+_When_ A oldal látogatása AND A felhasználónak nincs hozzáadás jogosultsága az A oldalhoz
+
+_Then_ Az oldalakon nem hozzáadhat.
+
+
+**Törlés esetén mindig mergerősíttést kérünk**
+
+_Given_ A felhasználó bejelentkezett
+
+_When_ A törlés ikonra kattint
+
+_Then_ Törlés esetén mindig mergerősíttést kérünk.
+
+
+
+### Visszalépés
+
+
+
+**A felhasználó visszalép az előző oldalra**
+
+_Given_ A felhasználó bejelentkezett AND Egy tetszőleges A oldalt majd B oldalt meglátogatott
+
+_When_ A felhasználó visszalép
+
+_Then_ A felhasználó az előző A oldalra kerül.
+
+
+
+### Projekt oldal
+
+
+
+**A felhasználó meglátogathatja a projekt oldalt**
+
+_Given_ A felhasználó bejelentkezett
+
+_When_ A felhasználónak van jogosultsága megtekinteni a projekt oldalt
+
+_Then_ A projekt oldal betölt.
+
+
+**A projekt oldalon a megfelelő adatok jelennek meg**
+
+_Given_ A projekt oldal betölt
+
+_Then_ A Projekt oldalon a megfelelő adatok jelennek meg.
+
+
+**A törlés ikonok megfelelően működnek**
+
+_Given_ A projekt oldal betölt
+
+_When_ felhasználónak van jogosultsága módosítani a projekt oldalon
+
+_Then_ A törlés ikon megjelenik minden projekt mellett.
+
+
+**A törlés ikonra kattintva a projekt törlődik**
+
+_Given_ A projekt oldal betölt
+
+_When_ felhasználó törölni próbál egy projektet
+
+_Then_ A projekt törlődik, minden hozzá tartozó adattal együtt.
+
+
+**A felhasználónak nincs jogosultsága módosíttani a projekt oldalon**
+
+_Given_ A projekt oldal betölt
+
+_When_ A felhasználónak nincs jogosultsága módosíttani a projekt oldalon
+
+_Then_ A projekt oldalon törlés ikon nem jelenik meg.
+
+
+**A szűrők megfelelően működnek, üres állapotból indulnak**
+
+_Given_ A projekt oldal betölt
+
+_Then_ A szűrők megfelelően működnek, üres állapotból indulnak.
+
+
+**Projektek kiválaszthatóak, és ezek megjelennek részletesen**
+
+_Given_ A projekt oldal betölt
+
+_When_ A felhasználó kiválaszt egy projektet
+
+_Then_ A projekt részletesen megjelenik.
+
+
+**Összesített oldal megfelelő adatokat jelenítt meg**
+
+_Given_ A projekt részletesen megjelenik
+
+_When_ A felhasználó kiválasztja az összesített oldalt
+
+_Then_ A összesített oldal megfelelő adatokat jelenítt meg.
+
+
+**Modulok oldal megfelelő adatokat jelenítt meg**
+
+_Given_ A projekt részletesen megjelenik
+
+_When_ A felhasználó kiválasztja a modulok oldalt
+
+_Then_ A modulok oldal megfelelő adatokat jelenítt meg.
+
+
+**A Rendelések oldal megfelelő adatokat jelenítt meg**
+
+_Given_ A projekt részletesen megjelenik
+
+_When_ A felhasználó kiválasztja a rendelések oldalt
+
+_Then_ A rendelések oldal megfelelő adatokat jelenítt meg.
+
+
+**A felhasználó klónoz egy projectet**
+
+_Given_ A felhasználó kiválasztja az összesített oldalt AND felhasználónak van jogosultsága módosítani a projekt oldalon
+
+_When_ A felhasználó a klónozás ikonra kattint
+
+_Then_ A projekt klónozása lehetséges.
+
+
+**Egységes módosíttás**
+
+_Given_ A felhasználó kiválasztja az összesített oldalt AND felhasználónak van jogosultsága módosítani a projekt oldalon
+
+_When_ A felhasználó a módosítás ikonra kattint
+
+_Then_ A projekt moduljai egyszerre módosíthatóak.
+
+
+**Megrendelés törlése**
+
+_Given_ A felhasználó kiválasztja a rendelések oldalt AND felhasználónak van jogosultsága módosítani a projekt oldalon
+
+_When_ A felhasználó a törlés ikonra kattint
+
+_Then_ A rendelés törlése lehetséges.
+
+
+**Megrendelés módosíttása**
+
+_Given_ A felhasználó kiválasztja a rendelések oldalt AND felhasználónak van jogosultsága módosítani a projekt oldalon
+
+_When_ A felhasználó a módosítás ikonra kattint
+
+_Then_ A rendelés módosíttása lehetséges.
+
+
+**A Modulok törlése lehetséges**
+
+_Given_ A felhasználó kiválasztja a modulok oldalt AND felhasználónak van jogosultsága módosítani a projekt oldalon
+
+_When_ A felhasználó a törlés ikonra kattint
+
+_Then_ A modulok törlése lehetséges.
+
+
+**A Modulok módosíttása lehetséges**
+
+_Given_ A felhasználó kiválasztja a modulok oldalt AND felhasználónak van jogosultsága módosítani a projekt oldalon
+
+_When_ A felhasználó a módosítás ikonra kattint
+
+_Then_ A modulok módosíttása lehetséges.
+
+
+**Order hozzáadássa lehetséges**
+
+_Given_ A felhasználó kiválasztja a rendelések oldalt AND felhasználónak van jogosultsága módosítani a projekt oldalon
+
+_When_ A felhasználó a rendelés hozzáadás ikonra kattint
+
+_Then_ A rendelés hozzáadása lehetséges.
+
+
+**Modul hozzáadássa lehetséges**
+
+_Given_ A felhasználó kiválasztja a modulok oldalt AND felhasználónak van jogosultsága módosítani a projekt oldalon AND a kiválasztott projektnek még nincs minden modulja hozzáadva
+
+_When_ A felhasználó a modul hozzáadás ikonra kattint
+
+_Then_ A modul hozzáadása lehetséges.
+
+
+**Új projekt hozzáadássa lehetséges**
+
+_Given_ A felhasználó kiválasztja a projekt oldalt AND felhasználónak van jogosultsága módosítani a projekt oldalon
+
+_When_ A felhasználó a projekt hozzáadás ikonra kattint
+
+_Then_ A projekt hozzáadása lehetséges.
+
+
+
+### A navigációs sáv a helyes adatokat tartalmazza és megfelelően funkcionál
+
+
+
+**A navigációs sáv betölt**
+
+_Given_ A felhasználó bejelentkezett
+
+_When_ Oldal látogatása
+
+_Then_ A navigációs sáv betölt.
+
+
+**A navigációs sáv a megfelelő adatokat tartalmazza**
+
+_Given_ A felhasználó bejelentkezett
+
+_When_ Oldal látogatása
+
+_Then_ A navigációs sáv a felhasználó nevét és a számára elérhető oldalakat tartalmazza.
+
+
+**A felhasználó a Home ikonra kattintva a főoldalra kerül**
+
+_Given_ A felhasználó bejelentkezett
+
+_When_ Home ikonra kattint
+
+_Then_ A főoldalra kerül.
+
+
+**A felhasználó a Training Calendar ikonra kattintva a Training Calendar oldalra kerül**
+
+_Given_ A felhasználó bejelentkezett
+
+_When_ Training Calendar ikonra kattint
+
+_Then_ A Training Calendar oldalra kerül.
+
+### A főoldal megfelelően betölt
+
+
+
+**A főoldalon megjelennek a jövőbeli események**
+
+_Given_ A felhasználó bejelentkezett
+
+_When_ Főoldal látogatása
+
+_Then_ A főoldalon megjelennek a jövőbeli események.
+
+
+**A jelenlegi hét inforációi töltenekbe**
+
+_Given_ A felhasználó bejelentkezett
+
+_When_ Főoldal látogatása
+
+_Then_ A főoldal a jelenlegi hét információit tartalmazza.
+
+
+**A főoldalon a hetek között navigálva az információ helyesen frissül**
+
+_Given_ A felhasználó bejelentkezett
+
+_When_ Főoldal látogatása
+
+_Then_ A főoldalon a hetek között navigálva az információ helyesen frissül.
+
+### Training Kalendár
+
+
+
+**A training kalendár megfelelően betölt**
+
+_Given_ A felhasználó bejelentkezett
+
+_When_ Training Kalendár látogatása
+
+_Then_ A Training Kalendár betölt.
+
+
+**A training kalendár navigálásra megfelelően frissül**
+
+_Given_ A felhasználó bejelentkezett
+
+_When_ A Training Kalendár betölt
+
+_Then_ A Training Kalendár navigálásra megfelelően frissül.
+
+
+**A training kalendár a jelenlegi hónapról indul**
+
+_Given_ A felhasználó bejelentkezett
+
+_When_ A Training Kalendár betölt
+
+_Then_ A Training Kalendár a jelenlegi hónapról indul.
+
+
+
+### Modulok oldal
+
+
+
+**A felhasználó meglátogathatja a modulok oldalt**
+
+_Given_ A felhasználó bejelentkezett
+
+_When_ A felhasználónak van jogosultsága megtekinteni a modulok oldalt
+
+_Then_ A modulok oldal betölt.
+
+
+**A Szűrők megfelelően működnek, üres állapotból indulnak**
+
+_Given_ A modulok oldal betölt
+
+_Then_ A szűrők megfelelően működnek, üres állapotból indulnak.
+
+
+**A kijelölt modul részletesen megjelenik**
+
+_Given_ A modulok oldal betölt
+
+_When_ A felhasználó kiválaszt egy modult
+
+_Then_ A kijelölt modul részletesen megjelenik.
+
+
+**Modulok módosíttása**
+
+_Given_ A modulok oldal betölt AND felhasználónak van jogosultsága módosítani a modulok oldalon
+
+_When_ A felhasználó a módosítás ikonra kattint
+
+_Then_ A modulok módosíttása lehetséges.
+
+
+**Modulok hozzáadássa lehetséges**
+
+_Given_ A modulok oldal betölt AND felhasználónak van jogosultsága módosítani a modulok oldalon
+
+_When_ A felhasználó a modul hozzáadás ikonra kattint
+
+_Then_ A modul hozzáadása lehetséges.
+
+### Product oldal
+
+
+
+**A felhasználó meglátogathatja a product oldalt**
+
+_Given_ A felhasználó bejelentkezett
+
+_When_ A felhasználónak van jogosultsága megtekinteni a product oldalt
+
+_Then_ A product oldal betölt.
+
+
+**A szűrők megfelelően működnek, üres állapotból indulnak**
+
+_Given_ A product oldal betölt
+
+_Then_ A szűrők megfelelően működnek, üres állapotból indulnak.
+
+
+**A kijelölt product részletesen megjelenik**
+
+_Given_ A product oldal betölt
+
+_When_ A felhasználó kiválaszt egy productet
+
+_Then_ A kijelölt product részletesen megjelenik a hozzáadott modulokkal együtt.
+
+
+**A product módosíttása lehetséges**
+
+_Given_ A product oldal betölt AND felhasználónak van jogosultsága módosítani a product oldalon
+
+_When_ A felhasználó a módosítás ikonra kattint
+
+_Then_ A product módosíttása lehetséges.
+
+
+**Product hozzáadássa lehetséges**
+
+_Given_ A product oldal betölt AND felhasználónak van jogosultsága módosítani a product oldalon
+
+_When_ A felhasználó a product hozzáadás ikonra kattint
+
+_Then_ A product hozzáadása lehetséges.
+
+
+
+### BankAccount oldal
+
+
+
+**A felhasználó meglátogathatja a bankaccount oldalt**
+
+_Given_ A felhasználó bejelentkezett
+
+_When_ A felhasználónak van jogosultsága megtekinteni a bankaccount oldalt
+
+_Then_ A bankaccount oldal betölt.
+
+
+**A szűrők megfelelően működnek, üres állapotból indulnak**
+
+_Given_ A bankaccount oldal betölt
+
+_Then_ A szűrők megfelelően működnek, üres állapotból indulnak.
+
+
+**Megjelenik a backlog**
+
+_Given_ A bankaccount oldal betölt
+
+_Then_ Megjelenik a backlog.
+
+
+**Megjelenik a backlog aggregálása per nap**
+
+_Given_ A bankaccount oldal betölt
+
+_Then_ Megjelenik a backlog aggregálása per nap.
+
+
+**A backlog módosíttása lehetséges**
+
+_Given_ A bankaccount oldal betölt AND felhasználónak van jogosultsága módosítani a bankaccount oldalon
+
+_When_ A felhasználó a módosítás ikonra kattint
+
+_Then_ A backlog módosíttása lehetséges.
+
+
+**Backlog hozzáadássa lehetséges**
+
+_Given_ A bankaccount oldal betölt AND felhasználónak van jogosultsága módosítani a bankaccount oldalon
+
+_When_ A felhasználó a backlog hozzáadás ikonra kattint
+
+_Then_ A backlog hozzáadása lehetséges.
+
+### CashFlow oldal
+
+
+
+**A felhasználó meglátogathatja a cashflow oldalt**
+
+_Given_ A felhasználó bejelentkezett
+
+_When_ A felhasználónak van jogosultsága megtekinteni a cashflow oldalt
+
+_Then_ A cashflow oldal betölt.
+
+
+**A szűrők megfelelően működnek, üres állapotból indulnak**
+
+_Given_ A cashflow oldal betölt
+
+_Then_ A szűrők megfelelően működnek, üres állapotból indulnak.
+
+
+**A CacheFlow oldal megfelelően aggregálja az adatokat és jelenitti meg a kiadásokat és bevételeket**
+
+_Given_ A cashflow oldal betölt
+
+_Then_ A CacheFlow oldal megfelelően aggregálja az adatokat és jelenitti meg a kiadásokat és bevételeket.
+
+### ÁfaReport oldal
+
+
+
+**A felhasználó meglátogathatja az áfareport oldalt**
+
+_Given_ A felhasználó bejelentkezett
+
+_When_ A felhasználónak van jogosultsága megtekinteni az áfareport oldalt
+
+_Then_ Az áfareport oldal betölt.
+
+
+**A szűrők megfelelően működnek, üres állapotból indulnak**
+
+_Given_ Az áfareport oldal betölt
+
+_Then_ A szűrők megfelelően működnek, üres állapotból indulnak.
+
+
+**Az áfareport oldal megfelelően aggregálja az adatokat és jelenitti meg az intervallumon összegzett áfa rétéket**
+
+_Given_ Az áfareport oldal betölt
+
+_Then_ Az áfareport oldal megfelelően aggregálja az adatokat és jelenitti meg teljes áfa érétéket.
+
+
+
+### Számlák oldal
+
+
+
+**A felhasználó meglátogathatja a számlák oldalt**
+
+_Given_ A felhasználó bejelentkezett
+
+_When_ A felhasználónak van jogosultsága megtekinteni a számlák oldalt
+
+_Then_ A számlák oldal betölt.
+
+
+**A szűrők megfelelően működnek, üres állapotból indulnak**
+
+_Given_ A számlák oldal betölt
+
+_Then_ A szűrők megfelelően működnek, üres állapotból indulnak.
+
+
+**Elérhető 3 féle presen a sűrők gyors állítására**
+
+_Given_ A számlák oldal betölt
+
+_Then_ Elérhető 3 féle presen a sűrők gyors állítására.
+
+
+**A kijelölt számla részletesen megjelenik**
+
+_Given_ A számlák oldal betölt
+
+_When_ A felhasználó kiválaszt egy számlát
+
+_Then_ A kijelölt számla részletesen megjelenik a számla tételeivel együtt.
+
+
+**A számla módosíttása lehetséges**
+
+_Given_ A számlák oldal betölt AND felhasználónak van jogosultsága módosítani a számla oldalon
+
+_When_ A felhasználó a módosítás ikonra kattint
+
+_Then_ A számla módosíttása lehetséges.
+
+
+**Számla hozzáadássa lehetséges**
+
+_Given_ A számlák oldal betölt AND felhasználónak van jogosultsága módosítani a számla oldalon
+
+_When_ A felhasználó a számla hozzáadás ikonra kattint
+
+_Then_ A számla hozzáadása lehetséges.
+
+
+**Számla törlése lehetséges**
+
+_Given_ A számlák oldal betölt AND felhasználónak van jogosultsága módosítani a számla oldalon
+
+_When_ A felhasználó a törlés ikonra kattint
+
+_Then_ A számla törlése lehetséges.
+
+
+**Számla Tétel törlése lehetséges**
+
+_Given_ A számlák oldal betölt AND felhasználónak van jogosultsága módosítani a számla oldalon
+
+_When_ A felhasználó a törlés ikonra kattint
+
+_Then_ A számla törlése lehetséges.
+
+
+**Számla Tétel hozzáadássa lehetséges**
+
+_Given_ A számlák oldal betölt AND felhasználónak van jogosultsága módosítani a számla oldalon
+
+_When_ A felhasználó a hozzáadás ikonra kattint
+
+_Then_ A számla hozzáadása lehetséges.
+
+
+**Számla Tétel módosíttása lehetséges**
+
+_Given_ A számlák oldal betölt AND felhasználónak van jogosultsága módosítani a számla oldalon
+
+_When_ A felhasználó a módosítás ikonra kattint
+
+_Then_ A számla módosíttása lehetséges.
+
+
+**Számla klónozása lehetséges**
+
+_Given_ A számlák oldal betölt AND felhasználónak van jogosultsága módosítani a számla oldalon
+
+_When_ A felhasználó a klónozás ikonra kattint
+
+_Then_ A számla klónozása lehetséges.
+
+
+
+### Oktatók oldal
+
+
+
+**A felhasználó meglátogathatja az oktatók oldalt**
+
+_Given_ A felhasználó bejelentkezett
+
+_When_ A felhasználónak van jogosultsága megtekinteni az oktatók oldalt
+
+_Then_ Az oktatók oldal betölt.
+
+
+**A szűrők megfelelően működnek, üres állapotból indulnak**
+
+_Given_ Az oktatók oldal betölt
+
+_Then_ A szűrők megfelelően működnek, üres állapotból indulnak.
+
+
+**Az oktató módosíttása lehetséges**
+
+_Given_ Az oktatók oldal betölt AND felhasználónak van jogosultsága módosítani az oktató oldalon
+
+_When_ A felhasználó a módosítás ikonra kattint
+
+_Then_ Az oktató módosíttása lehetséges.
+
+
+**Oktató hozzáadássa lehetséges**
+
+_Given_ Az oktatók oldal betölt AND felhasználónak van jogosultsága módosítani az oktató oldalon
+
+_When_ A felhasználó a oktató hozzáadás ikonra kattint
+
+_Then_ Az oktató hozzáadása lehetséges.
+
+
+**A kijelölt oktató részletesen megjelenik**
+
+_Given_ Az oktatók oldal betölt
+
+_When_ A felhasználó kiválaszt egy oktatót
+
+_Then_ A kijelölt oktató részletesen megjelenik.
+
+### Suppliers oldal
+
+
+
+**A felhasználó meglátogathatja a suppliers oldalt**
+
+_Given_ A felhasználó bejelentkezett
+
+_When_ A felhasználónak van jogosultsága megtekinteni a suppliers oldalt
+
+_Then_ A suppliers oldal betölt.
+
+
+**A kijelölt supplier részletesen megjelenik**
+
+_Given_ A suppliers oldal betölt
+
+_When_ A felhasználó kiválaszt egy supplieret
+
+_Then_ A kijelölt supplier részletesen megjelenik.
+
+
+**A supplier módosíttása lehetséges**
+
+_Given_ A suppliers oldal betölt AND felhasználónak van jogosultsága módosítani a supplier oldalon
+
+_When_ A felhasználó a módosítás ikonra kattint
+
+_Then_ A supplier módosíttása lehetséges.
+
+
+**Supplier hozzáadássa lehetséges**
+
+_Given_ A suppliers oldal betölt AND felhasználónak van jogosultsága módosítani a supplier oldalon
+
+_When_ A felhasználó a supplier hozzáadás ikonra kattint
+
+_Then_ A supplier hozzáadása lehetséges.
+
+### Kapcsolattartók oldal
+
+
+
+**A felhasználó meglátogathatja a kapcsolattartók oldalt**
+
+_Given_ A felhasználó bejelentkezett
+
+_When_ A felhasználónak van jogosultsága megtekinteni a kapcsolattartók oldalt
+
+_Then_ A kapcsolattartók oldal betölt.
+
+
+**A szűrők megfelelően működnek, üres állapotból indulnak**
+
+_Given_ A kapcsolattartók oldal betölt
+
+_Then_ A szűrők megfelelően működnek, üres állapotból indulnak.
+
+
+**A kijelölt kapcsolattartó részletesen megjelenik**
+
+_Given_ A kapcsolattartók oldal betölt
+
+_When_ A felhasználó kiválaszt egy kapcsolattartót
+
+_Then_ A kijelölt kapcsolattartó részletesen megjelenik.
+
+
+**A kapcsolattartó módosíttása lehetséges**
+
+_Given_ A kapcsolattartók oldal betölt AND felhasználónak van jogosultsága módosítani a kapcsolattartó oldalon
+
+_When_ A felhasználó a módosítás ikonra kattint
+
+_Then_ A kapcsolattartó módosíttása lehetséges.
+
+
+**Kapcsolattartó hozzáadássa lehetséges**
+
+_Given_ A kapcsolattartók oldal betölt AND felhasználónak van jogosultsága módosítani a kapcsolattartó oldalon
+
+_When_ A felhasználó a kapcsolattartó hozzáadás ikonra kattint
+
+_Then_ A kapcsolattartó hozzáadása lehetséges.
+
+### Résztvevők oldal
+
+
+
+**A felhasználó meglátogathatja a résztvevők oldalt**
+
+_Given_ A felhasználó bejelentkezett
+
+_When_ A felhasználónak van jogosultsága megtekinteni a résztvevők oldalt
+
+_Then_ A résztvevők oldal betölt.
+
+
+**A szűrők megfelelően működnek, üres állapotból indulnak**
+
+_Given_ A résztvevők oldal betölt
+
+_Then_ A szűrők megfelelően működnek, üres állapotból indulnak.
+
+
+**A résztvevő módosíttása lehetséges**
+
+_Given_ A résztvevők oldal betölt AND felhasználónak van jogosultsága módosítani a résztvevő oldalon
+
+_When_ A felhasználó a módosítás ikonra kattint
+
+_Then_ A résztvevő módosíttása lehetséges.
+
+
+**Résztvevő hozzáadássa lehetséges**
+
+_Given_ A résztvevők oldal betölt AND felhasználónak van jogosultsága módosítani a résztvevő oldalon
+
+_When_ A felhasználó a résztvevő hozzáadás ikonra kattint
+
+_Then_ A résztvevő hozzáadása lehetséges.
+
+
+**Több részvevő importálása excel file-ból**
+
+_Given_ A résztvevők oldal betölt AND felhasználónak van jogosultsága módosítani a résztvevő oldalon
+
+_When_ A felhasználó a importálás ikonra kattint
+
+_Then_ Több részvevő importálása lehetséges.
+
+### Ügyfél oldal
+
+
+
+**A felhasználó meglátogathatja az ügyfél oldalt**
+
+_Given_ A felhasználó bejelentkezett
+
+_When_ A felhasználónak van jogosultsága megtekinteni az ügyfél oldalt
+
+_Then_ Az ügyfél oldal betölt.
+
+
+**A szűrők megfelelően működnek, üres állapotból indulnak**
+
+_Given_ Az ügyfél oldal betölt
+
+_Then_ A szűrők megfelelően működnek, üres állapotból indulnak.
+
+
+**Az ügyfél módosíttása lehetséges**
+
+_Given_ Az ügyfél oldal betölt AND felhasználónak van jogosultsága módosítani az ügyfél oldalon
+
+_When_ A felhasználó a módosítás ikonra kattint
+
+_Then_ Az ügyfél módosíttása lehetséges.
+
+
+**Ügyfél hozzáadássa lehetséges**
+
+_Given_ Az ügyfél oldal betölt AND felhasználónak van jogosultsága módosítani az ügyfél oldalon
+
+_When_ A felhasználó a ügyfél hozzáadás ikonra kattint
+
+_Then_ Az ügyfél hozzáadása lehetséges.
+
+### A Core data alá tartozó (Holidays, Instructor, InvoiceLineType, Topics, Industries) oldalakon megfejelő jogosultság melett lehetséges a törlés és módosíttás
+
+
+
+**A felhasználó meglátogathatja a CoreData oldalakon**
+
+_Given_ A felhasználó bejelentkezett
+
+_When_ A felhasználónak van jogosultsága megtekinteni a CoreData oldalt
+
+_Then_ A megfelelő CoreData oldal betölt.
+
+
+**A megfelelő CoreData oldalon a törlés lehetséges**
+
+_Given_ A megfelelő CoreData oldal betölt AND A megfelelő CoreData oldal betölt
+
+_When_ A felhasználó a törlés ikonra kattint
+
+_Then_ A törlés lehetséges.
+
+
+**A megfelelő CoreData oldalon a módosíttás lehetséges**
+
+_Given_ A megfelelő CoreData oldal betölt AND A megfelelő CoreData oldal betölt
+
+_When_ A felhasználó a módosítás ikonra kattint
+
+_Then_ A módosíttás lehetséges.
+
+
+**A megfelelő CoreData oldalon a hozzáadás lehetséges**
+
+_Given_ A megfelelő CoreData oldal betölt AND A megfelelő CoreData oldal betölt
+
+_When_ A felhasználó a hozzáadás ikonra kattint
+
+_Then_ A hozzáadás lehetséges.
+
+
+
+### Email oldal
+
+
+
+**A felhasználó meglátogathatja az email oldalt**
+
+_Given_ A felhasználó bejelentkezett
+
+_When_ A felhasználónak van jogosultsága megtekinteni az email oldalt
+
+_Then_ Az email oldal betölt.
+
+
+**A szűrők megfelelően működnek, üres állapotból indulnak**
+
+_Given_ Az email oldal betölt
+
+_Then_ A szűrők megfelelően működnek, üres állapotból indulnak.
+
+
+**Az email-ek automatikusan legenerálódnak**
+
+_Given_ Az email oldal betölt
+
+_When_ A felhasználó a generálás ikonra kattint
+
+_Then_ Az email-ek automatikusan legenerálódnak.
+
+
+**Az email-eket egyesével lehetséges módosíttani**
+
+_Given_ Az email-ek automatikusan legenerálódnak
+
+_Then_ Az email-eket egyesével lehetséges módosíttani.
+
+
+**Az emaileknél bejelölhető hogy ne legyenek elküldve**
+
+_Given_ Az email-ek automatikusan legenerálódnak
+
+_Then_ Az emaileknél bejelölhető hogy ne legyenek elküldve.
+
+
+**Az email-eket áttnézését követően az emailek egy gombnyomásra kiküldhetőek és  ezekről azonnali visszajelzés van**
+
+_Given_ Az email-ek automatikusan legenerálódnak
+
+_When_ A felhasználó a kiküldés ikonra kattint
+
+_Then_ Az email-eket áttnézését követően az emailek egy gombnyomásra kiküldhetőek és  ezekről azonnali visszajelzés van.
+
+
+**Az email kiküldés egy összesíttést küld a céges @support email-re**
+
+_Given_ Az email-ek automatikusan legenerálódnak
+
+_When_ A felhasználó a kiküldés ikonra kattint
+
+_Then_ Az email kiküldés egy összesíttést küld a céges @support email-re.
+
+
+
+### Szerkesztő oldalak
+
+
+
+**A szerkesztő oldalakra navigálva megjelenítés jogosultsággal nem teszi lehetővé az adatok módosíttását csupán megtekintését**
+
+_Given_ A felhasználó bejelentkezett
+
+_When_ A felhasználónak van jogosultsága megtekinteni a szerkesztő oldalon AND A felhasználónak nincs jogosultsága módosítani a szerkesztő oldalon
+
+_Then_ A szerkesztő oldal betölt, de a módosíttás nem lehetséges.
+
+
+**Új adat hozzáadása lehetséges**
+
+_Given_ A felhasználó bejelentkezett AND A felhasználónak van jogosultsága módosítani a szerkesztő oldalon
+
+_When_ A felhasználó a hozzáadás ikonra kattint
+
+_Then_ Új adat hozzáadása lehetséges.
+
+
+**Szerkesztés lehetséges**
+
+_Given_ A felhasználó bejelentkezett AND A felhasználónak van jogosultsága módosítani a szerkesztő oldalon
+
+_When_ A felhasználó a módosítás ikonra kattint
+
+_Then_ Szerkesztés lehetséges.
+
+
+**Módosíttás lehetséges**
+
+_Given_ Új adat hozzáadása lehetséges OR Szerkesztés lehetséges
+
+_Then_ Módosíttás lehetséges.
+
+
+**Egy mező módosíttása tartja az adatbázis megszorításait**
+
+_Given_ Módosíttás lehetséges
+
+_When_ A felhasználó módosítja a mezőt
+
+_Then_ Az adatbázis megszoríttásai a kliens oldalon ellenőrzésre kerülnek.
+
+
+**Módosíttás után invalid mező jelzése**
+
+_Given_ Módosíttás lehetséges
+
+_When_ A felhasználó módosítja a mezőt
+
+_Then_ Az invalid mező jelzése megjelenik, hibaüzenettel.
+
+
+**A mentés csak akkor lehetséges ha minden mező valid**
+
+_Given_ Módosíttás lehetséges
+
+_When_ A felhasználó módosítja a mezőt
+
+_Then_ A mentés csak akkor lehetséges ha minden mező valid.
+
+
+**A tényleges változások csak a mentés pillanatában érvényesülnek**
+
+_Given_ Módosíttás lehetséges
+
+_When_ A felhasználó módosítja a mezőt
+
+_Then_ A tényleges változások csak a mentés pillanatában érvényesülnek.
+
+
+**A mentés után az adatok azonnal frissülnek és visszanavigálunk az előző oldalra**
+
+_Given_ Módosíttás lehetséges
+
+_When_ A felhasználó ment
+
+_Then_ A mentés után az adatok azonnal frissülnek és visszanavigálunk az előző oldalra.
+
+
+**Az igaz / hamis mezők checkbox-ként jelennek meg**
+
+_Given_ Módosíttás lehetséges
+
+_Then_ Az igaz / hamis mezők checkbox-ként jelennek meg.
+
+
+**A több de véges constrain-t ből származó lehetséges értékek kereshető dropdown-ként jelennek meg**
+
+_Given_ Módosíttás lehetséges
+
+_Then_ A több de véges constrain-t ből származó lehetséges értékek kereshető dropdown-ként jelennek meg.
+
+
+**Az adatbázis kapcsolatoknak megfelelően, ha egy módosíttás nem egyértelmű változásokat vonna maga után, a felhasználót értesítjük és kérjük megerősítését**
+
+_Given_ Módosíttás lehetséges
+
+_When_ A felhasználó módosítja a mezőt
+
+_Then_ Az adatbázis kapcsolatoknak megfelelően, ha egy módosíttás nem egyértelmű változásokat vonna maga után, a felhasználót értesítjük és kérjük megerősítését.
+
+
+**A kapcsolt táblák mezői egy jól érthető a másik táblából kinyert értékkel jelennek meg**
+
+_Given_ Módosíttás lehetséges
+
+_Then_ A kapcsolt táblák mezői egy jól érthető a másik táblából kinyert értékkel jelennek meg o.
+\normalsize
+
+**A külön nem speficikált részletek**:
+\
+Ezek a részletek belső megbeszélés során alakultak ki és folyamatosan változnak, ilyenek például a szűrők alépértelmezett beállítása vagy az alapértelmezett redezési kritériumok.
+
+Ezen esetekben a régi projekthez szándékozom feature-parity-t elérni, vagyis a régi projekthez hasonlóan működik majd az új is.
 
 
 

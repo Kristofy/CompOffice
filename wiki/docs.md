@@ -10,7 +10,7 @@ titlepage: true,
 titlepage-text-color: "424242"
 titlepage-rule-color: "360049"
 titlepage-rule-height: 0
-...
+---
 
 [{(content/title.md)}]
 
