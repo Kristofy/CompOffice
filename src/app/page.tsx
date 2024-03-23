@@ -1,19 +1,8 @@
-"use client"
-import { trpc } from "./_trpc/client";
+'use client';
 
+import ValidatorForm from '@/forms/components/validator-form';
+import { unitValidator } from '@/forms/schemas/services';
 
-export default function Home() {
-  const d = trpc.test.useQuery();
-  const units = trpc.getUnits.useQuery();
-
-  return (
-    <div>
-      <p>
-        {d.data}
-      </p>
-      <div>
-        {JSON.stringify(units.data)}
-      </div>
-    </div>
-  );
+export default function App() {
+	return <ValidatorForm validator={unitValidator} />;
 }
