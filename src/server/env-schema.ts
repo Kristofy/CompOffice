@@ -1,7 +1,7 @@
 import { fromZodIssue } from 'zod-validation-error';
 import z from 'zod';
 
-const envSchema = z.object({
+export const envSchema = z.object({
 	DATABASE_URL: z.string(),
 
 	AZURE_AD_CLIENT_ID: z.string(),
