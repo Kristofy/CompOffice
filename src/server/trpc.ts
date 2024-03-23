@@ -1,6 +1,10 @@
-import { initTRPC} from '@trpc/server';
+import { initTRPC } from '@trpc/server';
+import { getRouter } from '@/server/routes/get';
 
-const t = initTRPC.create();
+export const t = initTRPC.create();
 
-export const router = t.router;
-export const publicProcedure = t.procedure;
+export const appRouter = t.router({
+	get: getRouter,
+});
+
+export type AppRouter = typeof appRouter;
