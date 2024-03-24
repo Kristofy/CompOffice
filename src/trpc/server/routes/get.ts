@@ -6,6 +6,9 @@ export const getRouter = t.router({
 	units: t.procedure.query(async () => {
 		return prisma.unit.findMany();
 	}),
+	participants: t.procedure.query(async () => {
+		return prisma.participant.findMany();
+	}),
 	unit: t.procedure
 		.input(
 			z.object({

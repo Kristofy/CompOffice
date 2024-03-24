@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
 import './globals.css';
 import { Toaster } from 'react-hot-toast';
 import { SessionProvider } from 'next-auth/react';
@@ -47,6 +46,9 @@ export default async function RootLayout({
 								<MenubarMenu>
 									<MenubarTrigger>
 										<Link href="/test">Test</Link>
+									</MenubarTrigger>
+									<MenubarTrigger>
+										<Link href="/participant">Participant</Link>
 									</MenubarTrigger>
 									<MenubarTrigger>
 										<Link href="/other">Other</Link>

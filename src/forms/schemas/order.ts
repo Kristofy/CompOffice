@@ -1,3 +1,7 @@
+import { participant } from '@prisma/client';
+import { createValidator } from '../type-info';
+import { z } from 'zod';
+
 // customer
 
 // customer contact
@@ -11,3 +15,26 @@
 // order_participant
 
 // participant
+
+export const participantValiadator = createValidator<participant>({
+	id: {
+		form: z.string().min(1).pipe(z.coerce.number()),
+		api: z.number().min(0),
+		type: 'number',
+	},
+	email: {
+		form: z.string().email(),
+		api: z.string().email(),
+		type: 'string',
+	},
+	name: {
+		form: z.string(),
+		api: z.string(),
+		type: 'string',
+	},
+	customer: {
+		form: z.string().min(1).pipe(z.coerce.number()),
+		api: z.number(),
+		type: 'number',
+	},
+});
