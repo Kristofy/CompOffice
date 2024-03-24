@@ -5,10 +5,19 @@ import { Toaster } from 'react-hot-toast';
 import { SessionProvider } from 'next-auth/react';
 import AuthProvider from './auth-provider';
 import { Inter as FontSans } from 'next/font/google';
-
+import {
+	Menubar,
+	MenubarContent,
+	MenubarItem,
+	MenubarMenu,
+	MenubarSeparator,
+	MenubarShortcut,
+	MenubarTrigger,
+} from '@/components/ui/menubar';
 import { cn } from '@/lib/utils';
 import { auth } from '@/auth';
-import TRPCProvider from '@/app/_trpc/Provider';
+import Link from 'next/link';
+import TRPCProvider from '@/trpc/client/Provider';
 
 const fontSans = FontSans({
 	subsets: ['latin'],
@@ -33,7 +42,25 @@ export default async function RootLayout({
 				<html lang="en">
 					<body
 						className={cn('min-h-screen bg-background font-sans antialiased', fontSans.variable)}>
-						<AuthProvider>{children}</AuthProvider>
+						<AuthProvider>
+							<Menubar>
+								<MenubarMenu>
+									<MenubarTrigger>
+										<Link href="/test">Test</Link>
+									</MenubarTrigger>
+									<MenubarTrigger>
+										<Link href="/other">Other</Link>
+									</MenubarTrigger>
+									<MenubarTrigger>
+										<Link href="/">Home</Link>
+									</MenubarTrigger>
+									<MenubarTrigger>
+										<Link href="/unit">Units</Link>
+									</MenubarTrigger>
+								</MenubarMenu>
+							</Menubar>
+							{children}
+						</AuthProvider>
 						{/* <Toaster /> */}
 					</body>
 				</html>

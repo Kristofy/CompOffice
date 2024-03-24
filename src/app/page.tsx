@@ -1,8 +1,9 @@
 'use client';
 
-import ValidatorForm from '@/forms/components/validator-form';
-import { unitValidator } from '@/forms/schemas/services';
+import { trpc } from '@/trpc/client/client';
 
 export default function App() {
-	return <ValidatorForm validator={unitValidator} />;
+	const { data } = trpc.get.units.useQuery();
+
+	return <div>{JSON.stringify(data)}</div>;
 }

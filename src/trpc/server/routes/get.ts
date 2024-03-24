@@ -1,6 +1,6 @@
 import { prisma } from '@/server/prisma';
 import { z } from 'zod';
-import { t } from '@/server/trpc';
+import { t } from '@/trpc/server/trpc';
 
 export const getRouter = t.router({
 	units: t.procedure.query(async () => {
