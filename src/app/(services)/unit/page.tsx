@@ -5,7 +5,7 @@ import ValidatorForm from '@/forms/components/validator-form';
 import { unitValidator } from '@/forms/schemas/services';
 import { ValidatorList } from '@/forms/components/validator-list';
 
-export default function DemoPage() {
+export default function UnitPage() {
 	console.log('update unit page');
 
 	return (

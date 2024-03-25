@@ -56,6 +56,7 @@ export function ValidatorList<T>({ validator }: { validator: Validator<T> }) {
 
 	// Keep the data sorted
 	useEffect(() => {
+		console.log('sorting');
 		setFilteredData({
 			data: sortedData.data.sort((a: WithFilter<T>, b: WithFilter<T>) => {
 				const prop = sortedColumn.prop;
@@ -117,6 +118,7 @@ export function ValidatorList<T>({ validator }: { validator: Validator<T> }) {
 					filterElements={filterElements}
 					sortBy={sortedColumn}
 					setSortBy={setSortedColumn}
+					filterValues={filterValues}
 				/>
 				{status === 'loading' && 'Loading...'}
 				{status === 'success' && !!tableData && (

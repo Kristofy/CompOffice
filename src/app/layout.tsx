@@ -4,19 +4,27 @@ import { Toaster } from 'react-hot-toast';
 import { SessionProvider } from 'next-auth/react';
 import AuthProvider from './auth-provider';
 import { Inter as FontSans } from 'next/font/google';
-import {
-	Menubar,
-	MenubarContent,
-	MenubarItem,
-	MenubarMenu,
-	MenubarSeparator,
-	MenubarShortcut,
-	MenubarTrigger,
-} from '@/components/ui/menubar';
+
 import { cn } from '@/lib/utils';
 import { auth } from '@/auth';
 import Link from 'next/link';
 import TRPCProvider from '@/trpc/client/Provider';
+
+import {
+	Menubar,
+	MenubarCheckboxItem,
+	MenubarContent,
+	MenubarItem,
+	MenubarMenu,
+	MenubarRadioGroup,
+	MenubarRadioItem,
+	MenubarSeparator,
+	MenubarShortcut,
+	MenubarSub,
+	MenubarSubContent,
+	MenubarSubTrigger,
+	MenubarTrigger,
+} from '@/components/ui/menubar';
 
 const fontSans = FontSans({
 	subsets: ['latin'],
@@ -40,25 +48,120 @@ export default async function RootLayout({
 			<TRPCProvider>
 				<html lang="en">
 					<body
-						className={cn('min-h-screen bg-background font-sans antialiased', fontSans.variable)}>
+						className={cn('min-h-screen bg-secondary font-sans antialiased', fontSans.variable)}>
 						<AuthProvider>
 							<Menubar>
 								<MenubarMenu>
-									<MenubarTrigger>
-										<Link href="/test">Test</Link>
-									</MenubarTrigger>
-									<MenubarTrigger>
-										<Link href="/participant">Participant</Link>
-									</MenubarTrigger>
-									<MenubarTrigger>
-										<Link href="/other">Other</Link>
-									</MenubarTrigger>
-									<MenubarTrigger>
-										<Link href="/">Home</Link>
-									</MenubarTrigger>
-									<MenubarTrigger>
-										<Link href="/unit">Units</Link>
-									</MenubarTrigger>
+									<MenubarTrigger>Services</MenubarTrigger>
+									<MenubarContent>
+										<MenubarItem asChild>
+											<Link href="/unit" shallow>
+												Module
+											</Link>
+										</MenubarItem>
+										<MenubarItem>
+											New Window <MenubarShortcut>⌘N</MenubarShortcut>
+										</MenubarItem>
+										<MenubarItem disabled>New Incognito Window</MenubarItem>
+										<MenubarSeparator />
+										<MenubarSub>
+											<MenubarSubTrigger>Share</MenubarSubTrigger>
+											<MenubarSubContent>
+												<MenubarItem>Email link</MenubarItem>
+												<MenubarItem>Messages</MenubarItem>
+												<MenubarItem>Notes</MenubarItem>
+											</MenubarSubContent>
+										</MenubarSub>
+										<MenubarSeparator />
+										<MenubarItem>
+											Print... <MenubarShortcut>⌘P</MenubarShortcut>
+										</MenubarItem>
+									</MenubarContent>
+								</MenubarMenu>
+								<MenubarMenu>
+									<MenubarTrigger>Order</MenubarTrigger>
+									<MenubarContent>
+										<MenubarItem asChild>
+											<Link href="/participant" shallow>
+												Participants
+											</Link>
+										</MenubarItem>
+										<MenubarItem>
+											New Window <MenubarShortcut>⌘N</MenubarShortcut>
+										</MenubarItem>
+										<MenubarItem disabled>New Incognito Window</MenubarItem>
+										<MenubarSeparator />
+										<MenubarSub>
+											<MenubarSubTrigger>Share</MenubarSubTrigger>
+											<MenubarSubContent>
+												<MenubarItem>Email link</MenubarItem>
+												<MenubarItem>Messages</MenubarItem>
+												<MenubarItem>Notes</MenubarItem>
+											</MenubarSubContent>
+										</MenubarSub>
+										<MenubarSeparator />
+										<MenubarItem>
+											Print... <MenubarShortcut>⌘P</MenubarShortcut>
+										</MenubarItem>
+									</MenubarContent>
+								</MenubarMenu>
+								<MenubarMenu>
+									<MenubarTrigger>Edit</MenubarTrigger>
+									<MenubarContent>
+										<MenubarItem>
+											Undo <MenubarShortcut>⌘Z</MenubarShortcut>
+										</MenubarItem>
+										<MenubarItem>
+											Redo <MenubarShortcut>⇧⌘Z</MenubarShortcut>
+										</MenubarItem>
+										<MenubarSeparator />
+										<MenubarSub>
+											<MenubarSubTrigger>Find</MenubarSubTrigger>
+											<MenubarSubContent>
+												<MenubarItem>Search the web</MenubarItem>
+												<MenubarSeparator />
+												<MenubarItem>Find...</MenubarItem>
+												<MenubarItem>Find Next</MenubarItem>
+												<MenubarItem>Find Previous</MenubarItem>
+											</MenubarSubContent>
+										</MenubarSub>
+										<MenubarSeparator />
+										<MenubarItem>Cut</MenubarItem>
+										<MenubarItem>Copy</MenubarItem>
+										<MenubarItem>Paste</MenubarItem>
+									</MenubarContent>
+								</MenubarMenu>
+								<MenubarMenu>
+									<MenubarTrigger>View</MenubarTrigger>
+									<MenubarContent>
+										<MenubarCheckboxItem>Always Show Bookmarks Bar</MenubarCheckboxItem>
+										<MenubarCheckboxItem checked>Always Show Full URLs</MenubarCheckboxItem>
+										<MenubarSeparator />
+										<MenubarItem inset>
+											Reload <MenubarShortcut>⌘R</MenubarShortcut>
+										</MenubarItem>
+										<MenubarItem disabled inset>
+											Force Reload <MenubarShortcut>⇧⌘R</MenubarShortcut>
+										</MenubarItem>
+										<MenubarSeparator />
+										<MenubarItem inset>Toggle Fullscreen</MenubarItem>
+										<MenubarSeparator />
+										<MenubarItem inset>Hide Sidebar</MenubarItem>
+									</MenubarContent>
+								</MenubarMenu>
+								<MenubarMenu>
+									<MenubarTrigger>Profiles</MenubarTrigger>
+									<MenubarContent>
+										<MenubarRadioGroup value="benoit">
+											<MenubarRadioItem value="andy">Andy</MenubarRadioItem>
+											<MenubarRadioItem value="benoit">Benoit</MenubarRadioItem>
+											<MenubarRadioItem value="Luis">Luis</MenubarRadioItem>
+										</MenubarRadioGroup>
+										<MenubarSeparator />
+										<MenubarItem inset>Edit...</MenubarItem>
+										<MenubarSeparator />
+										<MenubarItem inset>Add Profile...</MenubarItem>
+									</MenubarContent>
 								</MenubarMenu>
 							</Menubar>
 							{children}
