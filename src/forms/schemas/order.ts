@@ -1,6 +1,8 @@
 import { participant } from '@prisma/client';
 import { createValidator } from '../type-info';
 import { z } from 'zod';
+import { UseQueryResult } from '@tanstack/react-query';
+import { trpc } from '@/trpc/client/client';
 
 // customer
 
@@ -17,24 +19,29 @@ import { z } from 'zod';
 // participant
 
 export const participantValiadator = createValidator<participant>({
-	id: {
-		form: z.string().min(1).pipe(z.coerce.number()),
-		api: z.number().min(0),
-		type: 'number',
+	get: {
+		useQuery: trpc.get.participants.useQuery,
 	},
-	email: {
-		form: z.string().email(),
-		api: z.string().email(),
-		type: 'string',
-	},
-	name: {
-		form: z.string(),
-		api: z.string(),
-		type: 'string',
-	},
-	customer: {
-		form: z.string().min(1).pipe(z.coerce.number()),
-		api: z.number(),
-		type: 'number',
+	schema: {
+		id: {
+			form: z.string().min(1).pipe(z.coerce.number()),
+			api: z.number().min(0),
+			type: 'number',
+		},
+		email: {
+			form: z.string().email(),
+			api: z.string().email(),
+			type: 'string',
+		},
+		name: {
+			form: z.string(),
+			api: z.string(),
+			type: 'string',
+		},
+		customer: {
+			form: z.string().min(1).pipe(z.coerce.number()),
+			api: z.number(),
+			type: 'number',
+		},
 	},
 });

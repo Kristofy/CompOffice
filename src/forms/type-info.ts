@@ -1,4 +1,15 @@
-import { Schema, ZodNumber, ZodObject, ZodRawShape, ZodSchema, ZodString, number, z } from 'zod';
+import { UseQueryResult } from '@tanstack/react-query';
+import {
+	Schema,
+	ZodNumber,
+	ZodObject,
+	ZodRawShape,
+	ZodSchema,
+	ZodString,
+	number,
+	unknown,
+	z,
+} from 'zod';
 
 export type Properties<Input> = Required<{
 	[K in keyof Input]: z.ZodType<Input[K]>;
@@ -34,10 +45,19 @@ export const FormType = {
 
 export type FormType = (typeof FormType)[keyof typeof FormType];
 
-export interface FormExtras {
+export interface ValidatorServerExtras<T> {
+	useQuery: () => UseQueryResult<T[], any>;
+}
+
+export interface FormExtras<T> {
 	type: FormType;
+	filter?: (target: string, data: T) => boolean;
 	default?: any;
 	unique?: boolean;
+}
+
+export interface ValidationFormExtras<T> {
+	row?: (({ data, index }: { data: T; index: number }) => Record<keyof T, React.ReactNode>) | null;
 }
 
 export interface Validator<T> {
@@ -63,7 +83,11 @@ export interface Validator<T> {
 	apiSchema: z.ZodObject<Properties<T>>;
 
 	schemaProperties: Map<keyof T, SchemaProperties>;
-	extras: Record<keyof T, FormExtras>;
+
+	get: ValidatorServerExtras<T>;
+	form?: ValidationFormExtras<T>;
+
+	extras: Record<keyof T, FormExtras<T>>;
 }
 
 interface SchemaZodField<T> {
@@ -71,20 +95,28 @@ interface SchemaZodField<T> {
 	api: ZodSchema<T>;
 }
 
-type SchemaField<T> = SchemaZodField<T> & FormExtras;
+type SchemaField<T, U> = SchemaZodField<T> & FormExtras<U>;
 
 type KeyToZodSchemaField<T> = {
-	[K in keyof T]: SchemaField<T[K]>;
+	[K in keyof T]: SchemaField<T[K], T>;
 };
 
 type KeyToZodSchema<T> = {
 	[K in keyof T]: ZodSchema<T[K]>;
 };
 
-export function createValidator<T>(schema: KeyToZodSchemaField<T>): Validator<T> {
+export function createValidator<T>({
+	schema,
+	get,
+	form = undefined,
+}: {
+	schema: KeyToZodSchemaField<T>;
+	get: ValidatorServerExtras<T>;
+	form?: ValidationFormExtras<T>;
+}): Validator<T> {
 	type Entries<T> = Extract<
-		{ [K in keyof T]: [K, SchemaField<T[K]>] }[keyof T],
-		[string, SchemaField<any>]
+		{ [K in keyof T]: [K, SchemaField<T[K], T>] }[keyof T],
+		[string, SchemaField<any, any>]
 	>;
 	const schemaEntries = Object.entries(schema) as Entries<T>[];
 
@@ -107,15 +139,17 @@ export function createValidator<T>(schema: KeyToZodSchemaField<T>): Validator<T>
 	const extras = Object.fromEntries(
 		schemaEntries.map(([key, field]) => {
 			const { api, form, ...extras } = field;
-			return [key, extras] as [keyof T, FormExtras];
+			return [key, extras] as [keyof T, FormExtras<T>];
 		})
-	) as Record<keyof T, FormExtras>;
+	) as Record<keyof T, FormExtras<T>>;
 
 	return {
 		formSchema: zodFormSchema,
 		apiSchema: zodApiSchema,
 		schemaProperties: getSchemaProperties(zodFormSchema),
+		get: get,
 		extras: extras,
+		form: form,
 	};
 }
 

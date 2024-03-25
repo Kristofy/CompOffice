@@ -3,10 +3,10 @@
 import { trpc } from '@/trpc/client/client';
 import ValidatorForm from '@/forms/components/validator-form';
 import { SubmitHandler } from 'react-hook-form';
-import { set, z } from 'zod';
+import { z } from 'zod';
 import { participantValiadator } from '@/forms/schemas/order';
 import { participant } from '@prisma/client';
-import ValidatorTable from '@/forms/components/validator-table';
+import { ValidatorTable } from '@/forms/components/validator-table';
 import { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -61,26 +61,28 @@ export default function DemoPage() {
 		setFiltered(participants.filter((p) => p.filter === 0).map((p) => p.data));
 	};
 
-	const searchOn = (value: string) => {
-		console.log(`Search changed "${value}"`);
-		const filterIndex = 0;
-
-		const addIndex = 1 << filterIndex;
-		const delIndex = ~addIndex;
-
-		if (value === '') {
-			participants.forEach((p) => (p.filter &= delIndex));
-		} else {
-			participants.forEach((p) => {
-				if (!p.data.name.includes(value)) {
-					p.filter |= addIndex;
-				} else {
-					p.filter &= delIndex;
-				}
-			});
+	const applyFilter = (filter: (_: participant) => boolean, index: number) => {
+		// assert that index is between 0 and 31
+		if (index < 0 || index > 31) {
+			throw new Error('Index out of bounds');
 		}
 
+		const addIndex = 1 << index;
+		const delIndex = ~addIndex;
+
+		participants.forEach((p) => {
+			if (filter(p.data)) {
+				p.filter |= addIndex;
+			} else {
+				p.filter &= delIndex;
+			}
+		});
+
 		setFiltered(participants.filter((p) => p.filter === 0).map((p) => p.data));
+	};
+
+	const searchOn = (value: string) => {
+		applyFilter((p) => p.name.includes(value), 0);
 	};
 
 	return (

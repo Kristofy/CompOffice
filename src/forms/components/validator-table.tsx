@@ -3,10 +3,9 @@ import { VirtualTable } from '@/components/ui/virtual-table';
 import AutoResizer from 'react-virtualized-auto-sizer';
 
 // row is a function from (data, index) => React.ReactNode
-export default function ValidatorTable<T>({
+export function ValidatorTable<T>({
 	row,
 	data,
-	validator,
 	size,
 	variant = 'virtual',
 }: {
@@ -16,18 +15,6 @@ export default function ValidatorTable<T>({
 	size: number;
 	variant?: 'virtual' | 'normal';
 }) {
-	const HeaderElement = (
-		<thead>
-			<tr>
-				{schemaKeys(validator.formSchema).map((key) => (
-					<th key={key as string} className="text-left">
-						{key as string}
-					</th>
-				))}
-			</tr>
-		</thead>
-	);
-
 	const Row = ({ index }: { index: number }) => {
 		const rows = row({ data: data[index], index: index });
 		const keys = Object.keys(rows) as (keyof T)[];

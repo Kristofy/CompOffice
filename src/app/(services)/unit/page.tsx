@@ -7,9 +7,9 @@ import { unitValidator } from '@/forms/schemas/services';
 import { z } from 'zod';
 import { participantValiadator } from '@/forms/schemas/order';
 import { unit } from '@prisma/client';
-import ValidatorTable from '@/forms/components/validator-table';
 import { Input } from '@/components/ui/input';
 import { useEffect, useState } from 'react';
+import { ValidatorList } from '@/forms/components/validator-list';
 
 const Row = ({ data: unit, index }: { data: unit; index: number }) => {
 	const entries = Object.entries(unit);
@@ -20,6 +20,7 @@ const Row = ({ data: unit, index }: { data: unit; index: number }) => {
 };
 
 export default function DemoPage() {
+	const res = trpc.get.units.useQuery();
 	const { data: _units, status: unitStatus } = trpc.get.units.useQuery();
 	const { mutate, error, data, status } = trpc.set.useMutation();
 
@@ -49,7 +50,7 @@ export default function DemoPage() {
 
 	return (
 		<div className="container mx-auto py-10 h-full w-full flex flex-col">
-			<div className="block">
+			{/* <div className="block">
 				<ValidatorForm validator={unitValidator} onSubmit={onSubmitHandler} />
 				{status === 'idle' && 'Submit the form to update the unit code'}
 				{status === 'loading' && 'Loading...'}
@@ -61,12 +62,10 @@ export default function DemoPage() {
 					onInput={(e: React.ChangeEvent<HTMLInputElement>) => searchOn(e.target.value)}
 				/>
 				<hr />
-			</div>
+			</div> */}
 			{unitStatus === 'loading' && 'Loading...'}
 			{unitStatus === 'error' && 'Error!' + error?.message}
-			{unitStatus === 'success' && !!units && (
-				<ValidatorTable<unit> validator={unitValidator} data={units} row={Row} size={45} />
-			)}
+			{unitStatus === 'success' && !!units && <ValidatorList<unit> validator={unitValidator} />}
 		</div>
 	);
 }
