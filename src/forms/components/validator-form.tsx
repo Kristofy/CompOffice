@@ -55,7 +55,7 @@ export default function ValidatorForm<T>({
 						const extra = extras[k];
 
 						return (
-							<ValidatorFormItem
+							<ValidatorFormItem<T>
 								key={key}
 								name={key}
 								schemaProps={props}

@@ -2,23 +2,46 @@
 
 import ValidatorForm from '@/forms/components/validator-form';
 import { SubmitHandler } from 'react-hook-form';
-import { z } from 'zod';
+import { set, z } from 'zod';
 import { participantValiadator } from '@/forms/schemas/order';
 import { participant } from '@prisma/client';
 import { ValidatorTable } from '@/forms/components/validator-table';
-import { useEffect, useState } from 'react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { FormExtras, Validator } from '../type-info';
 
+import { schemaKeys } from '@/forms/type-info';
+import ValidatorListHeader, { ValidatorListOrder } from './list-header';
+import { getFilters, WithFilter } from './filter-item';
+
 export function ValidatorList<T>({ validator }: { validator: Validator<T> }) {
+	const [selectedCommand, setSelectCommand] = useState<keyof T | null>(null);
+	const [sortedColumn, setSortedColumn] = useState<ValidatorListOrder<T>>({
+		prop: schemaKeys(validator.formSchema)[0]!,
+		order: 'DESC',
+	});
+
+	const { data: apiResponse, status } = validator.get.useQuery();
+	const [sortedData, setSortedData] = useState<{ data: WithFilter<T>[] }>({ data: [] });
+	const [filteredData, setFilteredData] = useState<{ data: WithFilter<T>[] }>({ data: [] });
+	const [tableData, setTableData] = useState<T[]>([]);
+	const [filterChanged, setFilterChanged] = useState<{
+		filter: (target: any, data: T) => boolean;
+		value: string;
+		index: number;
+	} | null>(null);
+
+	const [filterValues, setFilterValues] = useState<Record<keyof T, any>>({
+		...(Object.fromEntries<any>(schemaKeys(validator.formSchema).map((key) => [key, ''])) as Record<
+			keyof T,
+			any | null
+		>),
+	});
+
 	const Row =
 		validator?.form?.row ??
 		(({ data, index }: { data: T; index: number }) => {
 			return data as Record<keyof T, React.ReactNode>;
 		});
-
-	const { data: originalData, status } = validator.get.useQuery();
 
 	const onSubmitHandler: SubmitHandler<any> = (
 		data: z.infer<typeof participantValiadator.formSchema>
@@ -26,89 +49,80 @@ export function ValidatorList<T>({ validator }: { validator: Validator<T> }) {
 		console.log(data);
 	};
 
-	interface WithFilter {
-		data: T;
-		filter: number;
-	}
+	// When the api responds with data, create the data for the filters
+	useEffect(() => {
+		setSortedData({ data: apiResponse?.map((p) => ({ data: p, filter: 0 })) ?? [] });
+	}, [apiResponse]);
 
-	const [filterData, setFilterData] = useState<WithFilter[]>(
-		originalData?.map((p) => ({ data: p, filter: 0 })) ?? []
-	);
+	// Keep the data sorted
+	useEffect(() => {
+		setFilteredData({
+			data: sortedData.data.sort((a: WithFilter<T>, b: WithFilter<T>) => {
+				const prop = sortedColumn.prop;
+				const lhs = a.data[prop];
+				const rhs = b.data[prop];
+				const order = sortedColumn.order === 'ASC' ? 1 : -1;
+				const cmp = +(lhs > rhs) - +(lhs < rhs);
+				return cmp * order;
+			}),
+		});
+	}, [sortedData, sortedColumn]);
 
 	useEffect(() => {
-		setFilterData(originalData?.map((p) => ({ data: p, filter: 0 })) ?? []);
-	}, [originalData]);
-
-	const [filtered, setFiltered] = useState<T[]>(
-		filterData.filter((p) => p.filter === 0).map((p) => p.data)
-	);
-
-	useEffect(() => {
-		setFiltered(filterData.filter((p) => p.filter === 0).map((p) => p.data));
-	}, [filterData]);
-
-	// const [order, setOrder] = useState<'asc' | 'desc'>('asc');
-
-	// const sortOn = () => {
-	// 	// sorts inplace
-	// 	filterData.sort(
-	// 		(a, b) => a.data.name.localeCompare(b.data.name) * (order === 'asc' ? 1 : -1)
-	// 	);
-
-	// 	setOrder(order === 'asc' ? 'desc' : 'asc');
-	// 	setFiltered(filterData.filter((p) => p.filter === 0).map((p) => p.data));
-	// };
-
-	const applyFilter = (filter: (target: any, _: T) => boolean, target: any, index: number) => {
-		// assert that index is between 0 and 31
-		if (index < 0 || index > 31) {
-			throw new Error('Index out of bounds');
+		if (!filterChanged) {
+			setTableData(filteredData.data.filter((p) => p.filter === 0).map((p) => p.data));
+			return;
 		}
 
-		const addIndex = 1 << index;
-		const delIndex = ~addIndex;
+		const applyFilter = (
+			filter: (target: any, data: T) => boolean,
+			value: string,
+			index: number,
+			list: WithFilter<T>[]
+		) => {
+			const addIndex = 1 << index;
+			const delIndex = ~addIndex;
 
-		filterData.forEach((p) => {
-			if (!filter(target, p.data)) {
-				p.filter |= addIndex;
-			} else {
-				p.filter &= delIndex;
-			}
-		});
+			list.forEach((p) => {
+				if (!filter(value, p.data)) {
+					p.filter |= addIndex;
+				} else {
+					p.filter &= delIndex;
+				}
+			});
 
-		setFiltered(filterData.filter((p) => p.filter === 0).map((p) => p.data));
-	};
+			return list.filter((p) => p.filter === 0).map((p) => p.data);
+		};
+		setTableData(
+			applyFilter(filterChanged.filter, filterChanged.value, filterChanged.index, filteredData.data)
+		);
+	}, [filterChanged, filteredData]);
 
-	const filters = Object.entries(validator.extras)
-		.map(([key, value], index) => {
-			const extras = value as FormExtras<T>;
-			const filter = extras.filter;
-			if (!filter) {
-				return null;
-			}
+	const callback = useCallback(
+		(filter: (target: any, data: T) => boolean, value: string, index: number) => {
+			setFilterChanged({ filter, value, index });
+		},
+		[]
+	);
 
-			return (
-				<div key={key} className="flex flex-col">
-					<label>{key}</label>
-					<Input
-						type={extras.type}
-						placeholder={key}
-						onChange={(e) => {
-							applyFilter(filter, e.target.value, index);
-						}}
-					/>
-				</div>
-			);
-		})
-		.filter((f) => f !== null);
+	const filterElements = useMemo<Record<keyof T, JSX.Element | null>>(() => {
+		// NOTE(Kristofy): This rerenders on every input because of the default value of the previous state
+		return getFilters(validator, callback, setFilterValues, filterValues);
+	}, [validator, callback, filterValues]);
 
 	return (
-		<div className="container mx-auto py-10 h-full w-full flex flex-col">
-			<div className="flex flex-col gap-2">{filters}</div>
-			{status === 'loading' && 'Loading...'}
-			{status === 'success' && !!filtered && (
-				<ValidatorTable<T> validator={validator} data={filtered} row={Row} size={45} />
-			)}
-		</div>
+		<>
+			<div className="container mx-auto p-2 h-full w-full flex flex-col">
+				<ValidatorListHeader
+					filterElements={filterElements}
+					sortBy={sortedColumn}
+					setSortBy={setSortedColumn}
+				/>
+				{status === 'loading' && 'Loading...'}
+				{status === 'success' && !!tableData && (
+					<ValidatorTable<T> validator={validator} data={tableData} row={Row} size={45} />
+				)}
+			</div>
+		</>
 	);
 }

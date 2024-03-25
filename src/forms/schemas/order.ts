@@ -19,6 +19,7 @@ import { trpc } from '@/trpc/client/client';
 // participant
 
 export const participantValiadator = createValidator<participant>({
+	form: {},
 	get: {
 		useQuery: trpc.get.participants.useQuery,
 	},
@@ -32,6 +33,9 @@ export const participantValiadator = createValidator<participant>({
 			form: z.string().email(),
 			api: z.string().email(),
 			type: 'string',
+			filter(target, data) {
+				return data.email.toLowerCase().includes(target.toLowerCase());
+			},
 		},
 		name: {
 			form: z.string(),

@@ -19,7 +19,7 @@ export function ValidatorTable<T>({
 		const rows = row({ data: data[index], index: index });
 		const keys = Object.keys(rows) as (keyof T)[];
 		return (
-			<tr className={`hover:bg-slate-700 ${index % 2 ? 'bg-zinc-600' : 'bg-slate-500'}`}>
+			<tr className={`hover:bg-accent ${index % 2 ? 'bg-secondary' : 'bg-secondary/75'}`}>
 				{keys.map((key) => (
 					<td key={key as string} className="m-0 p-0">
 						<div style={{ display: 'block', height: size, overflow: 'hidden' }}>{rows[key]}</div>
@@ -39,7 +39,7 @@ export function ValidatorTable<T>({
 							width={width}
 							itemCount={data.length}
 							itemSize={size}
-							overscanCount={10}
+							overscanCount={50}
 							row={Row}
 						/>
 					)}

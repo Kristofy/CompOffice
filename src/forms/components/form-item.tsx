@@ -10,15 +10,15 @@ import { FormExtras, SchemaProperties } from '../type-info';
 import { ControllerRenderProps, UseFormReturn } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
 
-interface FormItemProps {
+interface FormItemProps<T> {
 	name: string;
 	// children: React.ReactNode;
 	schemaProps: SchemaProperties;
-	extra: FormExtras;
+	extra: FormExtras<T>;
 	form: UseFormReturn<{ [x: string]: any }, any, undefined>;
 }
 
-export default function ValidatorFormItem({ name, schemaProps, extra, form }: FormItemProps) {
+export default function ValidatorFormItem<T>({ name, schemaProps, extra, form }: FormItemProps<T>) {
 	type Field = ControllerRenderProps<
 		{
 			[x: string]: any;

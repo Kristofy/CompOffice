@@ -57,7 +57,12 @@ export interface FormExtras<T> {
 }
 
 export interface ValidationFormExtras<T> {
-	row?: (({ data, index }: { data: T; index: number }) => Record<keyof T, React.ReactNode>) | null;
+	header?: <T>({
+		filterElements,
+	}: {
+		filterElements: Record<keyof T, JSX.Element | null>;
+	}) => React.ReactNode;
+	row?: ({ data, index }: { data: T; index: number }) => Record<keyof T, React.ReactNode>;
 }
 
 export interface Validator<T> {
