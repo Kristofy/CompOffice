@@ -6,72 +6,96 @@ import { set, z } from 'zod';
 import { participantValiadator } from '@/forms/schemas/order';
 import { participant } from '@prisma/client';
 import { ValidatorTable } from '@/forms/components/validator-table';
-import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
+import {
+	ReactNode,
+	SetStateAction,
+	useCallback,
+	useDeferredValue,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from 'react';
+import { CiEdit } from 'react-icons/ci';
 import { FormExtras, Validator } from '../type-info';
 
 import { schemaKeys } from '@/forms/type-info';
 import ValidatorListHeader, { ValidatorListOrder } from './list-header';
 import { getFilters, WithFilter } from './filter-item';
 
-export function ValidatorList<T>({ validator }: { validator: Validator<T> }) {
+export function ValidatorList<T extends object>({ validator }: { validator: Validator<T> }) {
 	const [selectedCommand, setSelectCommand] = useState<keyof T | null>(null);
 	const [sortedColumn, setSortedColumn] = useState<ValidatorListOrder<T>>({
 		prop: schemaKeys(validator.formSchema)[0]!,
 		order: 'DESC',
 	});
-
 	const { data: apiResponse, status } = validator.get.useQuery();
-	const [sortedData, setSortedData] = useState<{ data: WithFilter<T>[] }>({ data: [] });
-	const [filteredData, setFilteredData] = useState<{ data: WithFilter<T>[] }>({ data: [] });
+	const sortedData = useRef<WithFilter<T>[]>([]);
+	const filteredData = useRef<WithFilter<T>[]>([]);
 	const [tableData, setTableData] = useState<T[]>([]);
 	const [filterChanged, setFilterChanged] = useState<{
 		filter: (target: any, data: T) => boolean;
 		value: string;
 		index: number;
 	} | null>(null);
-
 	const [filterValues, setFilterValues] = useState<Record<keyof T, any>>({
 		...(Object.fromEntries<any>(schemaKeys(validator.formSchema).map((key) => [key, ''])) as Record<
 			keyof T,
 			any | null
 		>),
 	});
+	const defferedFilterValues = useDeferredValue(filterValues);
+	const defferedFilterChanged = useDeferredValue(filterChanged);
 
-	const Row =
-		validator?.form?.row ??
-		(({ data, index }: { data: T; index: number }) => {
-			return data as Record<keyof T, React.ReactNode>;
-		});
+	const Row = useMemo(
+		() =>
+			validator?.form?.row ??
+			(({ data, index }: { data: T; index: number }) => {
+				const dataFields = Object.fromEntries(
+					Object.entries(data).map(([k, v]) => [
+						k,
+						<div key={k} className="ml-3 flex items-center justify-center h-full">
+							<span className="text-ellipsis block max-w-full overflow-hidden text-nowrap">
+								{v}
+							</span>
+						</div>,
+					])
+				) as Record<keyof T, React.ReactNode>;
 
-	const onSubmitHandler: SubmitHandler<any> = (
-		data: z.infer<typeof participantValiadator.formSchema>
-	) => {
-		console.log(data);
-	};
+				const extraFields = [<CiEdit key="validation-component-edit" />];
+
+				return { ...dataFields, ...extraFields };
+			}),
+		[validator]
+	);
 
 	// When the api responds with data, create the data for the filters
 	useEffect(() => {
-		setSortedData({ data: apiResponse?.map((p) => ({ data: p, filter: 0 })) ?? [] });
+		// console.log('Data loaded');
+		sortedData.current = apiResponse?.map((p) => ({ data: p, filter: 0 })) ?? [];
+		filteredData.current = sortedData.current;
+		setTableData(sortedData.current.map((p) => p.data));
 	}, [apiResponse]);
 
 	// Keep the data sorted
 	useEffect(() => {
-		console.log('sorting');
-		setFilteredData({
-			data: sortedData.data.sort((a: WithFilter<T>, b: WithFilter<T>) => {
-				const prop = sortedColumn.prop;
-				const lhs = a.data[prop];
-				const rhs = b.data[prop];
-				const order = sortedColumn.order === 'ASC' ? 1 : -1;
-				const cmp = +(lhs > rhs) - +(lhs < rhs);
-				return cmp * order;
-			}),
+		// console.log('Sort changed');
+		filteredData.current = sortedData.current.sort((a: WithFilter<T>, b: WithFilter<T>) => {
+			const prop = sortedColumn.prop;
+			const lhs = a.data[prop];
+			const rhs = b.data[prop];
+			const order = sortedColumn.order === 'ASC' ? 1 : -1;
+			const cmp = +(lhs > rhs) - +(lhs < rhs);
+			return cmp * order;
 		});
-	}, [sortedData, sortedColumn]);
+
+		setTableData(filteredData.current.filter((p) => p.filter === 0).map((p) => p.data));
+	}, [sortedColumn]);
 
 	useEffect(() => {
-		if (!filterChanged) {
-			setTableData(filteredData.data.filter((p) => p.filter === 0).map((p) => p.data));
+		// console.log('Filter changed');
+		if (!defferedFilterChanged) {
+			setTableData(filteredData.current.filter((p) => p.filter === 0).map((p) => p.data));
 			return;
 		}
 
@@ -95,36 +119,56 @@ export function ValidatorList<T>({ validator }: { validator: Validator<T> }) {
 			return list.filter((p) => p.filter === 0).map((p) => p.data);
 		};
 		setTableData(
-			applyFilter(filterChanged.filter, filterChanged.value, filterChanged.index, filteredData.data)
+			applyFilter(
+				defferedFilterChanged.filter,
+				defferedFilterChanged.value,
+				defferedFilterChanged.index,
+				filteredData.current
+			)
 		);
-	}, [filterChanged, filteredData]);
+	}, [defferedFilterChanged]);
 
-	const callback = useCallback(
-		(filter: (target: any, data: T) => boolean, value: string, index: number) => {
-			setFilterChanged({ filter, value, index });
-		},
-		[]
+	const extra = useMemo(() => {
+		return [<p key="sdf">Hi</p>, <p key="ho">ASD</p>];
+	}, []);
+
+	console.log(extra);
+	const header = useMemo(
+		() => (
+			<ValidatorListHeader
+				validator={validator}
+				setFilterValues={setFilterValues}
+				sortBy={sortedColumn}
+				setSortBy={setSortedColumn}
+				filterValues={defferedFilterValues}
+				setFilterChanged={setFilterChanged}
+				extra={extra}
+			/>
+		),
+		[defferedFilterValues, extra, sortedColumn, validator]
 	);
+	const optimizedHeader = useDeferredValue(header);
 
-	const filterElements = useMemo<Record<keyof T, JSX.Element | null>>(() => {
-		// NOTE(Kristofy): This rerenders on every input because of the default value of the previous state
-		return getFilters(validator, callback, setFilterValues, filterValues);
-	}, [validator, callback, filterValues]);
+	const listComponent = useMemo(() => {
+		console.log('Rerender list');
 
-	return (
-		<>
-			<div className="container mx-auto p-2 h-full w-full flex flex-col">
-				<ValidatorListHeader
-					filterElements={filterElements}
-					sortBy={sortedColumn}
-					setSortBy={setSortedColumn}
-					filterValues={filterValues}
-				/>
-				{status === 'loading' && 'Loading...'}
-				{status === 'success' && !!tableData && (
-					<ValidatorTable<T> validator={validator} data={tableData} row={Row} size={45} />
-				)}
-			</div>
-		</>
-	);
+		return (
+			<>
+				<div className="container mx-auto p-2 h-full w-full flex flex-col">
+					{status === 'loading' && 'Loading...'}
+					{status === 'success' && !!tableData && (
+						<ValidatorTable<T>
+							validator={validator}
+							data={tableData}
+							row={Row}
+							size={45}
+							header={optimizedHeader}
+						/>
+					)}
+				</div>
+			</>
+		);
+	}, [status, tableData, validator, Row, optimizedHeader]);
+
+	return listComponent;
 }

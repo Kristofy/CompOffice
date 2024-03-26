@@ -1,14 +1,21 @@
 import { Input } from '@/components/ui/input';
 import { FormExtras, Validator } from '../type-info';
+import { SetStateAction } from 'react';
 
 export interface WithFilter<T> {
 	data: T;
 	filter: number;
 }
 
-export function getFilters<T>(
+export function getFilters<T extends object>(
 	validator: Validator<T>,
-	callback: (filter: (target: any, data: T) => boolean, value: string, index: number) => void,
+	setFilterChanged: (
+		value: SetStateAction<{
+			filter: (target: any, data: T) => boolean;
+			value: string;
+			index: number;
+		} | null>
+	) => void,
 	setValue: (value: Record<keyof T, string>) => void,
 	value: Record<keyof T, string>
 ) {
@@ -25,9 +32,9 @@ export function getFilters<T>(
 					name={key}
 					type={extras.type}
 					placeholder={key}
-					value={value[key as keyof T]}
+					defaultValue={value[key as keyof T]}
 					onChange={(e) => {
-						callback(filter, e.target.value, index);
+						setFilterChanged({ filter: filter, value: e.target.value, index: index });
 						setValue({
 							...value,
 							[key as keyof T]: e.target.value,

@@ -12,6 +12,9 @@ export const unitValidator = createValidator<unit>({
 			form: z.string().min(1).pipe(z.coerce.number()),
 			api: z.number(),
 			type: 'number',
+			filter(target, data) {
+				return data.id.toString().toLowerCase().includes(target.toLowerCase());
+			},
 		},
 		code: {
 			form: z.string().min(1).max(50),

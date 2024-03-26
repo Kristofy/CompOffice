@@ -10,6 +10,7 @@ import {
 	unknown,
 	z,
 } from 'zod';
+import { defaultLayout } from './default-layout';
 
 export type Properties<Input> = Required<{
 	[K in keyof Input]: z.ZodType<Input[K]>;
@@ -54,6 +55,8 @@ export interface FormExtras<T> {
 	filter?: (target: string, data: T) => boolean;
 	default?: any;
 	unique?: boolean;
+	hidden?: boolean;
+	ratio?: number;
 }
 
 export interface ValidationFormExtras<T> {
@@ -63,9 +66,12 @@ export interface ValidationFormExtras<T> {
 		filterElements: Record<keyof T, JSX.Element | null>;
 	}) => React.ReactNode;
 	row?: ({ data, index }: { data: T; index: number }) => Record<keyof T, React.ReactNode>;
+
+	gridLayout: string;
+	columnLayout: React.ReactNode;
 }
 
-export interface Validator<T> {
+export interface Validator<T extends object> {
 	/**
 	 * Schema for the form
 	 * It should only contain validation rules for the input fields and
@@ -90,7 +96,7 @@ export interface Validator<T> {
 	schemaProperties: Map<keyof T, SchemaProperties>;
 
 	get: ValidatorServerExtras<T>;
-	form?: ValidationFormExtras<T>;
+	form: ValidationFormExtras<T>;
 
 	extras: Record<keyof T, FormExtras<T>>;
 }
@@ -110,14 +116,14 @@ type KeyToZodSchema<T> = {
 	[K in keyof T]: ZodSchema<T[K]>;
 };
 
-export function createValidator<T>({
+export function createValidator<T extends object>({
 	schema,
 	get,
 	form = undefined,
 }: {
 	schema: KeyToZodSchemaField<T>;
 	get: ValidatorServerExtras<T>;
-	form?: ValidationFormExtras<T>;
+	form?: Partial<ValidationFormExtras<T>>;
 }): Validator<T> {
 	type Entries<T> = Extract<
 		{ [K in keyof T]: [K, SchemaField<T[K], T>] }[keyof T],
@@ -148,13 +154,17 @@ export function createValidator<T>({
 		})
 	) as Record<keyof T, FormExtras<T>>;
 
+	console.log('Extras: ', extras);
+
+	console.log('Default column layout: ', defaultLayout<T>(extras));
+
 	return {
 		formSchema: zodFormSchema,
 		apiSchema: zodApiSchema,
 		schemaProperties: getSchemaProperties(zodFormSchema),
 		get: get,
 		extras: extras,
-		form: form,
+		form: { ...defaultLayout<T>(extras), ...form },
 	};
 }
 

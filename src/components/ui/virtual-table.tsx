@@ -7,9 +7,13 @@ import { FixedSizeList, FixedSizeListProps } from 'react-window';
 
 /** Context for cross component communication */
 const VirtualTableContext = createContext<{
+	columnLayout: React.ReactNode;
+	header: React.ReactNode;
 	top: number;
 	setTop: (top: number) => void;
 }>({
+	columnLayout: <></>,
+	header: <></>,
 	top: 0,
 	setTop: (value: number) => {},
 });
@@ -23,12 +27,14 @@ const Inner = forwardRef<HTMLDivElement, React.HTMLProps<HTMLDivElement>>(functi
 	{ children, ...rest },
 	ref
 ) {
-	const { top } = useContext(VirtualTableContext);
+	const { top, columnLayout, header } = useContext(VirtualTableContext);
 	return (
 		<div {...rest} ref={ref}>
 			<table
 				style={{ top, position: 'absolute', width: '100%' }}
-				className="table-fixed border-collapse border border-slate-300">
+				className="border-collapse border-2 table-fixed">
+				{header}
+				{columnLayout}
 				<tbody>{children}</tbody>
 			</table>
 		</div>
@@ -36,16 +42,20 @@ const Inner = forwardRef<HTMLDivElement, React.HTMLProps<HTMLDivElement>>(functi
 });
 
 export function VirtualTable({
+	columnLayout,
+	header,
 	row,
 	...rest
 }: {
+	columnLayout?: React.ReactNode;
+	header?: React.ReactNode;
 	row: FixedSizeListProps['children'];
 } & Omit<FixedSizeListProps, 'children' | 'innerElementType'>) {
 	const listRef = useRef<FixedSizeList | null>();
 	const [top, setTop] = useState(0);
 
 	return (
-		<VirtualTableContext.Provider value={{ top, setTop }}>
+		<VirtualTableContext.Provider value={{ top, setTop, columnLayout, header }}>
 			<FixedSizeList
 				{...rest}
 				innerElementType={Inner}

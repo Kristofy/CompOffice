@@ -3,16 +3,19 @@ import { VirtualTable } from '@/components/ui/virtual-table';
 import AutoResizer from 'react-virtualized-auto-sizer';
 
 // row is a function from (data, index) => React.ReactNode
-export function ValidatorTable<T>({
+export function ValidatorTable<T extends object>({
 	row,
 	data,
+	validator,
 	size,
+	header,
 	variant = 'virtual',
 }: {
 	row: ({ data, index }: { data: T; index: number }) => Record<keyof T, React.ReactNode>;
 	data: T[];
 	validator: Validator<T>;
 	size: number;
+	header?: React.ReactNode;
 	variant?: 'virtual' | 'normal';
 }) {
 	const Row = ({ index }: { index: number }) => {
@@ -30,7 +33,7 @@ export function ValidatorTable<T>({
 	};
 
 	return (
-		<div className="mb-3 flex-1">
+		<div className="mb-3 flex-1 rounded-t-3xl overflow-hidden">
 			<div className="block w-full h-full">
 				<AutoResizer>
 					{({ height, width }) => (
@@ -40,6 +43,8 @@ export function ValidatorTable<T>({
 							itemCount={data.length}
 							itemSize={size}
 							overscanCount={50}
+							header={header}
+							columnLayout={<colgroup>{validator.form.columnLayout}</colgroup>}
 							row={Row}
 						/>
 					)}

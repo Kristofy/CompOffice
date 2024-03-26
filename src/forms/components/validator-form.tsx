@@ -15,7 +15,7 @@ import {
 import { Button } from '@/components/ui/button';
 import ValidatorFormItem from './form-item';
 
-export default function ValidatorForm<T>({
+export default function ValidatorForm<T extends object>({
 	validator,
 	onSubmit,
 }: {
