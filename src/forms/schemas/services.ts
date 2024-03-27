@@ -1,18 +1,18 @@
-import { unit } from '@prisma/client';
+import { participant, unit } from '@prisma/client';
 import { z } from 'zod';
-import { Properties, Validator, createValidator } from '@/forms/type-info';
+import { DataHandler } from '@/forms/type-info';
 import { trpc } from '@/trpc/client/client';
 
-export const unitValidator = createValidator<unit>({
-	get: {
+export const unitValidator = new DataHandler<unit>({
+	server: {
 		useQuery: trpc.get.units.useQuery,
 	},
-	schema: {
+	fields: {
 		id: {
 			form: z.string().min(1).pipe(z.coerce.number()),
 			api: z.number(),
 			type: 'number',
-			filter(target, data) {
+			filter({ target, data }) {
 				return data.id.toString().toLowerCase().includes(target.toLowerCase());
 			},
 		},
@@ -20,35 +20,31 @@ export const unitValidator = createValidator<unit>({
 			form: z.string().min(1).max(50),
 			api: z.string().min(1).max(50),
 			type: 'string',
-			filter: (target: string, data: unit) =>
-				data.code.toLowerCase().includes(target.toLowerCase()),
+			filter: ({ target, data }) => data.code.toLowerCase().includes(target.toLowerCase()),
 		},
 		name: {
 			form: z.string().nullable(),
 			api: z.string().min(1).max(500),
 			type: 'string',
-			filter: (target: string, data: unit) =>
-				!!data.name?.toLowerCase().includes(target.toLowerCase()),
+			filter: ({ target, data }) => !!data.name?.toLowerCase().includes(target.toLowerCase()),
 		},
 		status: {
 			form: z.enum(['A', 'I']),
 			api: z.enum(['A', 'I']),
 			type: 'string',
-			filter: (target: string, data: unit) =>
-				data.status.toLowerCase().includes(target.toLowerCase()),
+			filter: ({ target, data }) => data.status.toLowerCase().includes(target.toLowerCase()),
 		},
 		type: {
 			form: z.string(),
 			api: z.enum(['T', 'S', 'C']),
 			type: 'string',
-			filter: (target: string, data: unit) =>
-				data.type.toLowerCase().includes(target.toLowerCase()),
+			filter: ({ target, data }) => data.type.toLowerCase().includes(target.toLowerCase()),
 		},
 		topic: {
 			form: z.string().min(1).pipe(z.coerce.number()),
 			api: z.number().nullable(),
 			type: 'number',
-			filter: (target: string, data: unit) =>
+			filter: ({ target, data }) =>
 				!!data.topic?.toString().toLowerCase().includes(target.toLowerCase()),
 		},
 		list_price_HUF: {

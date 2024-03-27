@@ -2,7 +2,6 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { schemaKeys, Validator } from '../type-info';
 import {
 	Form,
 	FormControl,
@@ -14,21 +13,20 @@ import {
 } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import ValidatorFormItem from './form-item';
+import { DataHandler } from '../type-info';
 
 export default function ValidatorForm<T extends object>({
-	validator,
+	dataHandler,
 	onSubmit,
 }: {
-	validator: Validator<T>;
+	dataHandler: DataHandler<T>;
 	onSubmit: SubmitHandler<any>;
 }) {
-	const { formSchema: schema, apiSchema, schemaProperties, extras } = validator;
-
 	const form = useForm({
-		resolver: zodResolver(schema),
+		resolver: zodResolver(dataHandler.schema.form),
 		mode: 'onChange',
-		defaultValues: schemaKeys(schema)
-			.map((k) => ({ [k]: extras[k]?.default || '' }))
+		defaultValues: Object.entries(dataHandler.columns.model.props)
+			.map(([k, v]) => ({ [k]: v?.default || '' }))
 			.reduce((acc, x) => ({ ...acc, ...x }), {}),
 	});
 
@@ -49,17 +47,12 @@ export default function ValidatorForm<T extends object>({
 				<form
 					onSubmit={form.handleSubmit(onSubmit)}
 					className="container my-2 grid grid-cols-3 gap-3">
-					{schemaKeys(schema).map((k) => {
-						const key = k as string;
-						const props = schemaProperties.get(k)!;
-						const extra = extras[k];
-
+					{Object.entries(dataHandler.columns.model.props).map(([k, props]) => {
 						return (
 							<ValidatorFormItem<T>
-								key={key}
-								name={key}
-								schemaProps={props}
-								extra={extra}
+								key={k as string}
+								name={k as string}
+								props={props}
 								form={form}
 							/>
 						);

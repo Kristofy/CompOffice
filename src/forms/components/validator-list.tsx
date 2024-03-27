@@ -17,19 +17,24 @@ import {
 	useState,
 } from 'react';
 import { CiEdit } from 'react-icons/ci';
-import { FormExtras, Validator } from '../type-info';
-
-import { schemaKeys } from '@/forms/type-info';
 import ValidatorListHeader, { ValidatorListOrder } from './list-header';
 import { getFilters, WithFilter } from './filter-item';
+import { DataHandler } from '../type-info';
 
-export function ValidatorList<T extends object>({ validator }: { validator: Validator<T> }) {
+export function ValidatorList<T extends object>({
+	validator: dataHandler,
+}: {
+	validator: DataHandler<T>;
+}) {
+	type AllKey = DataHandler<T>['columns']['all']['keys'][number];
+	type AllType = T & Record<string, any>;
+
 	const [selectedCommand, setSelectCommand] = useState<keyof T | null>(null);
 	const [sortedColumn, setSortedColumn] = useState<ValidatorListOrder<T>>({
-		prop: schemaKeys(validator.formSchema)[0]!,
+		prop: dataHandler.columns.model.keys[0]!,
 		order: 'DESC',
 	});
-	const { data: apiResponse, status } = validator.get.useQuery();
+	const { data: apiResponse, status } = dataHandler.server.useQuery();
 	const sortedData = useRef<WithFilter<T>[]>([]);
 	const filteredData = useRef<WithFilter<T>[]>([]);
 	const [tableData, setTableData] = useState<T[]>([]);
@@ -38,9 +43,9 @@ export function ValidatorList<T extends object>({ validator }: { validator: Vali
 		value: string;
 		index: number;
 	} | null>(null);
-	const [filterValues, setFilterValues] = useState<Record<keyof T, any>>({
-		...(Object.fromEntries<any>(schemaKeys(validator.formSchema).map((key) => [key, ''])) as Record<
-			keyof T,
+	const [filterValues, setFilterValues] = useState<Record<AllKey, any>>({
+		...(Object.fromEntries<any>(dataHandler.columns.all.keys.map((key) => [key, ''])) as Record<
+			AllKey,
 			any | null
 		>),
 	});
@@ -49,9 +54,8 @@ export function ValidatorList<T extends object>({ validator }: { validator: Vali
 
 	const Row = useMemo(
 		() =>
-			validator?.form?.row ??
-			(({ data, index }: { data: T; index: number }) => {
-				const dataFields = Object.fromEntries(
+			({ data, index }: { data: AllType; index: number }) =>
+				Object.fromEntries(
 					Object.entries(data).map(([k, v]) => [
 						k,
 						<div key={k} className="ml-3 flex items-center justify-center h-full">
@@ -60,13 +64,8 @@ export function ValidatorList<T extends object>({ validator }: { validator: Vali
 							</span>
 						</div>,
 					])
-				) as Record<keyof T, React.ReactNode>;
-
-				const extraFields = [<CiEdit key="validation-component-edit" />];
-
-				return { ...dataFields, ...extraFields };
-			}),
-		[validator]
+				) as Record<keyof T, React.ReactNode>,
+		[]
 	);
 
 	// When the api responds with data, create the data for the filters
@@ -136,7 +135,7 @@ export function ValidatorList<T extends object>({ validator }: { validator: Vali
 	const header = useMemo(
 		() => (
 			<ValidatorListHeader
-				validator={validator}
+				validator={dataHandler}
 				setFilterValues={setFilterValues}
 				sortBy={sortedColumn}
 				setSortBy={setSortedColumn}
@@ -145,7 +144,7 @@ export function ValidatorList<T extends object>({ validator }: { validator: Vali
 				extra={extra}
 			/>
 		),
-		[defferedFilterValues, extra, sortedColumn, validator]
+		[defferedFilterValues, extra, sortedColumn, dataHandler]
 	);
 	const optimizedHeader = useDeferredValue(header);
 
@@ -158,7 +157,7 @@ export function ValidatorList<T extends object>({ validator }: { validator: Vali
 					{status === 'loading' && 'Loading...'}
 					{status === 'success' && !!tableData && (
 						<ValidatorTable<T>
-							validator={validator}
+							validator={dataHandler}
 							data={tableData}
 							row={Row}
 							size={45}
@@ -168,7 +167,7 @@ export function ValidatorList<T extends object>({ validator }: { validator: Vali
 				</div>
 			</>
 		);
-	}, [status, tableData, validator, Row, optimizedHeader]);
+	}, [status, tableData, dataHandler, Row, optimizedHeader]);
 
 	return listComponent;
 }

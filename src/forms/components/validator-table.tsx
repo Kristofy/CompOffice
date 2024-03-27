@@ -1,19 +1,19 @@
-import { schemaKeys, Validator } from '../type-info';
 import { VirtualTable } from '@/components/ui/virtual-table';
 import AutoResizer from 'react-virtualized-auto-sizer';
+import { DataHandler } from '../type-info';
 
 // row is a function from (data, index) => React.ReactNode
 export function ValidatorTable<T extends object>({
 	row,
 	data,
-	validator,
+	validator: dataHandler,
 	size,
 	header,
 	variant = 'virtual',
 }: {
 	row: ({ data, index }: { data: T; index: number }) => Record<keyof T, React.ReactNode>;
 	data: T[];
-	validator: Validator<T>;
+	validator: DataHandler<T>;
 	size: number;
 	header?: React.ReactNode;
 	variant?: 'virtual' | 'normal';
@@ -44,7 +44,7 @@ export function ValidatorTable<T extends object>({
 							itemSize={size}
 							overscanCount={50}
 							header={header}
-							columnLayout={<colgroup>{validator.form.columnLayout}</colgroup>}
+							columnLayout={<colgroup>{dataHandler.form.columnLayout}</colgroup>}
 							row={Row}
 						/>
 					)}

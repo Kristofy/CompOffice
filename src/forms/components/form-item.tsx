@@ -6,19 +6,22 @@ import {
 	FormLabel,
 	FormMessage,
 } from '@/components/ui/form';
-import { FormExtras, SchemaProperties } from '../type-info';
+import { FormProps } from '../type-info';
 import { ControllerRenderProps, UseFormReturn } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
 
-interface FormItemProps<T> {
+interface FormItemProps<T extends object> {
 	name: string;
 	// children: React.ReactNode;
-	schemaProps: SchemaProperties;
-	extra: FormExtras<T>;
+	props: FormProps<T, any>;
 	form: UseFormReturn<{ [x: string]: any }, any, undefined>;
 }
 
-export default function ValidatorFormItem<T>({ name, schemaProps, extra, form }: FormItemProps<T>) {
+export default function ValidatorFormItem<T extends object>({
+	name,
+	props,
+	form,
+}: FormItemProps<T>) {
 	type Field = ControllerRenderProps<
 		{
 			[x: string]: any;
@@ -27,7 +30,7 @@ export default function ValidatorFormItem<T>({ name, schemaProps, extra, form }:
 	>;
 
 	const inputElement = (field: Field) => {
-		switch (extra.type) {
+		switch (props.type) {
 			case 'number':
 				return <Input type="number" {...field} />;
 			case 'string':
@@ -36,6 +39,8 @@ export default function ValidatorFormItem<T>({ name, schemaProps, extra, form }:
 						<Input type="text" {...field} />
 					</>
 				);
+			default:
+				return <Input type="text" {...field} />;
 		}
 	};
 

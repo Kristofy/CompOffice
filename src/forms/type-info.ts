@@ -10,204 +10,173 @@ import {
 	unknown,
 	z,
 } from 'zod';
-import { defaultLayout } from './default-layout';
+import { unit } from '@prisma/client';
+import { FormType } from './form-config';
+import { ReactNode } from 'react';
+import { getLayout } from './default-layout';
 
-export type Properties<Input> = Required<{
-	[K in keyof Input]: z.ZodType<Input[K]>;
+/**
+ * Data Handler Utility types
+ */
+
+type KeyWithZodSchema<T> = Required<{
+	[K in keyof T]: z.ZodType<T[K]>;
 }>;
 
-export function schemaKeys<T extends ZodRawShape>(schema: ZodObject<T>): (keyof T)[] {
-	return Object.keys(schema.shape) as (keyof T)[];
+interface DataHandlerServer<Model extends object> {
+	useQuery: () => UseQueryResult<Model[], any>;
 }
 
-export interface SchemaNumberProperties {
-	minValue: number | null;
-	maxValue: number | null;
+interface DataHandlerConfigSchema<T> {
+	api: z.ZodType<T>;
+	form: z.ZodTypeAny;
 }
 
-export interface SchemaStringProperties {
-	minLength: number | null;
-	maxLength: number | null;
+interface DataHandlerSchema<T extends object> {
+	api: ZodObject<KeyWithZodSchema<T>>;
+	form: ZodObject<KeyWithZodSchema<T>>;
 }
 
-export interface SchemaProperties {
-	isNumber: boolean;
-	isString: boolean;
-	isBoolean: boolean;
-	isRequired: boolean;
-	numberProps: SchemaNumberProperties | null;
-	stringProps: SchemaStringProperties | null;
-}
-
-export const FormType = {
-	number: 'number',
-	string: 'string',
-} as const;
-
-export type FormType = (typeof FormType)[keyof typeof FormType];
-
-export interface ValidatorServerExtras<T> {
-	useQuery: () => UseQueryResult<T[], any>;
-}
-
-export interface FormExtras<T> {
-	type: FormType;
-	filter?: (target: string, data: T) => boolean;
-	default?: any;
-	unique?: boolean;
-	hidden?: boolean;
+/**
+ * T is the object of all files
+ * U is the current fieds infered type
+ */
+export interface FormProps<T extends object, K> {
+	type?: FormType;
+	filter?: ({ target, data }: { target: K; data: T }) => boolean;
+	// TODO(Kristofy): This is sortable and filterable optionally
+	header?: ({ filter }: { filter: ReactNode }) => ReactNode;
+	default?: K;
+	min?: number;
+	max?: number;
 	ratio?: number;
+	hidden?: boolean;
+	unique?: boolean;
+	required?: boolean;
 }
 
-export interface ValidationFormExtras<T> {
-	header?: <T>({
-		filterElements,
-	}: {
-		filterElements: Record<keyof T, JSX.Element | null>;
-	}) => React.ReactNode;
-	row?: ({ data, index }: { data: T; index: number }) => Record<keyof T, React.ReactNode>;
-
-	gridLayout: string;
-	columnLayout: React.ReactNode;
-}
-
-export interface Validator<T extends object> {
-	/**
-	 * Schema for the form
-	 * It should only contain validation rules for the input fields and
-	 * coercion rules if needed, since the form fields are almost always strings.
-	 * @date 3/23/2024 - 4:44:20 PM
-	 *
-	 * @type {z.ZodObject<Properties<T>>}
-	 */
-	formSchema: z.ZodObject<Properties<T>>;
-
-	/**
-	 * The schema for the API
-	 * It should contain every validation rule that the database expects.
-	 * The schema can expect the input fields to be coerced to the correct type.
-	 * Can throw errors if the input is invalid. (even if the type is incorrect)
-	 * @date 3/23/2024 - 4:45:54 PM
-	 *
-	 * @type {z.ZodObject<Properties<T>>}
-	 */
-	apiSchema: z.ZodObject<Properties<T>>;
-
-	schemaProperties: Map<keyof T, SchemaProperties>;
-
-	get: ValidatorServerExtras<T>;
-	form: ValidationFormExtras<T>;
-
-	extras: Record<keyof T, FormExtras<T>>;
-}
-
-interface SchemaZodField<T> {
-	form: ZodSchema<any>;
-	api: ZodSchema<T>;
-}
-
-type SchemaField<T, U> = SchemaZodField<T> & FormExtras<U>;
-
-type KeyToZodSchemaField<T> = {
-	[K in keyof T]: SchemaField<T[K], T>;
+type DataHandlerConfigModel<Property> = {
+	api: DataHandlerConfigSchema<Property>['api'];
+	form?: DataHandlerConfigSchema<Property>['form'];
+	calc?: never;
 };
 
-type KeyToZodSchema<T> = {
-	[K in keyof T]: ZodSchema<T[K]>;
+type DataHandlerConfigAdditional<Model extends object> = {
+	api?: never;
+	form?: never;
+	calc?: ({ data }: { data: Model }) => unknown;
 };
 
-export function createValidator<T extends object>({
-	schema,
-	get,
-	form = undefined,
-}: {
-	schema: KeyToZodSchemaField<T>;
-	get: ValidatorServerExtras<T>;
-	form?: Partial<ValidationFormExtras<T>>;
-}): Validator<T> {
-	type Entries<T> = Extract<
-		{ [K in keyof T]: [K, SchemaField<T[K], T>] }[keyof T],
-		[string, SchemaField<any, any>]
-	>;
-	const schemaEntries = Object.entries(schema) as Entries<T>[];
+type FromFormZodSchema<K> = DataHandlerConfigModel<K>['form'] extends undefined
+	? undefined
+	: z.input<Exclude<DataHandlerConfigModel<K>['form'], undefined>>;
+type FromCalc<Model extends object> = DataHandlerConfigAdditional<Model>['calc'] extends undefined
+	? undefined
+	: ReturnType<Exclude<DataHandlerConfigAdditional<Model>['calc'], undefined>>;
 
-	const apiEntries = schemaEntries.map(([key, field]) => [key, field.api]) as [
-		keyof T,
-		ZodSchema<any>,
-	][];
-
-	const apiSchema = Object.fromEntries(apiEntries) as KeyToZodSchema<T>;
-	const zodApiSchema = z.object(apiSchema) as ZodObject<Properties<T>>;
-
-	const formEntries = schemaEntries.map(([key, field]) => [key, field.form]) as [
-		keyof T,
-		ZodSchema<any>,
-	][];
-
-	const formSchema = Object.fromEntries(formEntries) as KeyToZodSchema<T>;
-	const zodFormSchema = z.object(formSchema) as ZodObject<Properties<T>>;
-
-	const extras = Object.fromEntries(
-		schemaEntries.map(([key, field]) => {
-			const { api, form, ...extras } = field;
-			return [key, extras] as [keyof T, FormExtras<T>];
-		})
-	) as Record<keyof T, FormExtras<T>>;
-
-	console.log('Extras: ', extras);
-
-	console.log('Default column layout: ', defaultLayout<T>(extras));
-
-	return {
-		formSchema: zodFormSchema,
-		apiSchema: zodApiSchema,
-		schemaProperties: getSchemaProperties(zodFormSchema),
-		get: get,
-		extras: extras,
-		form: { ...defaultLayout<T>(extras), ...form },
+interface DataHandlerConfig<Model extends object, Additional extends object> {
+	server: DataHandlerServer<Model>;
+	fields: {
+		[K in keyof Model]: DataHandlerConfigModel<Model[K]> & FormProps<Model & Additional, K>;
+	};
+	additional?: {
+		[K in keyof Additional]: DataHandlerConfigAdditional<Model> & FormProps<Model, FromCalc<Model>>;
 	};
 }
 
-function getSchemaProperties<T extends ZodRawShape>(
-	schema: ZodObject<T>
-): Map<keyof T, SchemaProperties> {
-	const fieldProps = new Map<keyof T, SchemaProperties>();
+/**
+ * Data Handler
+ */
 
-	for (const key in schema.shape) {
-		let field = schema.shape[key];
+export interface DataHandlerColumn<T extends object, U extends object, K> {
+	keys: (keyof T)[];
+	props: FormProps<U, K>;
+}
 
-		let formFieldProps: SchemaProperties = {
-			isNumber: false,
-			isString: false,
-			isBoolean: false,
-			isRequired: true,
-			numberProps: null,
-			stringProps: null,
+// HA filed FormProps<Model & Additional, K>
+// Ha additional FormProps<Model, FromCalc<Model>>
+interface DataHandlerColumnTypes<
+	Model extends object,
+	K extends keyof Model,
+	Additional extends object,
+> {
+	model: DataHandlerColumn<Model, Model & Additional, K>;
+	additional: DataHandlerColumn<Additional, Model, FromCalc<Model>>;
+	all: DataHandlerColumn<Additional & Model, Model & Additional, K | FromCalc<Model>>;
+}
+
+interface DataHandlerFormProps<Model extends object, Additional extends object> {
+	columnLayout: ReactNode;
+}
+
+export class DataHandler<Model extends object> {
+	schema: DataHandlerSchema<Model>;
+	columns: DataHandlerColumnTypes<Model, keyof Model, Record<string, any>>;
+	server: DataHandlerServer<Model>;
+	form: DataHandlerFormProps<Model, Record<string, any>>;
+
+	// TODO(Kristofy): We should make sure that there is no overlap between the keys of the model and the additional fields
+	constructor({ server, fields, additional }: DataHandlerConfig<Model, Record<string, any>>) {
+		this.server = server;
+
+		const modelEntries = Object.entries<any>(fields) as [
+			keyof Model,
+			DataHandlerConfigModel<any> & FormProps<Model & Record<string, any>, any>,
+		][];
+		const additionalEntries = !additional
+			? []
+			: (Object.entries<any>(additional) as [
+					keyof Record<string, any>,
+					DataHandlerConfigAdditional<any> & FormProps<Model, FromCalc<Model>>,
+				][]);
+
+		const modelKeys = modelEntries.map(([key]) => key) as (keyof Model)[];
+		const additionalKeys = additionalEntries.map(([key]) => key) as string[];
+
+		const modelProps = Object.fromEntries(
+			modelEntries.map(([key, { api, form, calc, ...props }]) => [key, { ...props }])
+		) as {
+			[K in keyof Model]: FormProps<Model & Record<string, any>, K>;
 		};
 
-		if (field.isNullable() || field.isOptional()) {
-			formFieldProps.isRequired = false;
-			field = field?._def?.innerType;
-		}
+		const additionalProps = Object.fromEntries(
+			additionalEntries.map(([key, { calc, api, form, ...props }]) => [key, { ...props }])
+		) as {
+			[K in keyof Record<string, any>]: FormProps<Model, FromCalc<Model>>;
+		};
 
-		if (field instanceof ZodNumber) {
-			formFieldProps.isNumber = true;
-			formFieldProps.numberProps = {
-				minValue: field.minValue,
-				maxValue: field.maxValue,
-			};
-		}
+		const apiSchemas = modelEntries.map(([key, { api }]) => [key, api]);
+		const apiSchema = z.object(
+			Object.fromEntries(apiSchemas) as { [K in keyof Model]: ZodSchema<Model[K]> }
+		) as ZodObject<KeyWithZodSchema<Model>>;
 
-		if (field instanceof ZodString) {
-			formFieldProps.isString = true;
-			formFieldProps.stringProps = {
-				minLength: field.minLength,
-				maxLength: field.maxLength,
-			};
-		}
+		const formSchemas = modelEntries.map(([key, { form }]) => [key, form ?? z.any()]);
+		const formSchema = z.object(
+			Object.fromEntries(formSchemas) as { [K in keyof Model]: Schema<any> }
+		) as ZodObject<KeyWithZodSchema<Model>>;
 
-		fieldProps.set(key as keyof T, formFieldProps);
+		this.columns = {
+			model: {
+				keys: modelKeys,
+				props: modelProps,
+			},
+			additional: {
+				keys: additionalKeys,
+				props: additionalProps,
+			},
+			all: {
+				keys: [...modelKeys, ...additionalKeys],
+				props: { ...modelProps, ...additionalProps },
+			},
+		};
+
+		this.schema = {
+			api: apiSchema,
+			form: formSchema,
+		};
+
+		this.form = {
+			columnLayout: getLayout(this.columns.all.props),
+		};
 	}
-
-	return fieldProps;
 }

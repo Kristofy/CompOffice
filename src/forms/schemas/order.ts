@@ -1,5 +1,5 @@
 import { participant } from '@prisma/client';
-import { createValidator } from '../type-info';
+import { DataHandler } from '../type-info';
 import { z } from 'zod';
 import { UseQueryResult } from '@tanstack/react-query';
 import { trpc } from '@/trpc/client/client';
@@ -18,12 +18,11 @@ import { trpc } from '@/trpc/client/client';
 
 // participant
 
-export const participantValiadator = createValidator<participant>({
-	form: {},
-	get: {
+export const participantValiadator = new DataHandler<participant>({
+	server: {
 		useQuery: trpc.get.participants.useQuery,
 	},
-	schema: {
+	fields: {
 		id: {
 			form: z.string().min(1).pipe(z.coerce.number()),
 			api: z.number().min(0),
@@ -33,7 +32,7 @@ export const participantValiadator = createValidator<participant>({
 			form: z.string().email(),
 			api: z.string().email(),
 			type: 'string',
-			filter(target, data) {
+			filter({ target, data }) {
 				return data.email.toLowerCase().includes(target.toLowerCase());
 			},
 		},

@@ -14,8 +14,8 @@ import { MoreHorizontal } from 'lucide-react';
 import { FaSort, FaSortAmountDown, FaSortAmountUp } from 'react-icons/fa';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { PopoverClose } from '@radix-ui/react-popover';
-import { Validator } from '../type-info';
 import { getFilters } from './filter-item';
+import { DataHandler } from '../type-info';
 
 export interface ValidatorListOrder<T> {
 	prop: keyof T;
@@ -31,7 +31,7 @@ export default function ValidatorListHeader<T extends object>({
 	setFilterValues,
 	extra,
 }: {
-	validator: Validator<T>;
+	validator: DataHandler<T>;
 	setFilterChanged: (
 		value: SetStateAction<{
 			filter: (target: any, data: T) => boolean;
@@ -39,10 +39,10 @@ export default function ValidatorListHeader<T extends object>({
 			index: number;
 		} | null>
 	) => void;
-	sortBy: { prop: keyof T; order: 'ASC' | 'DESC' };
+	sortBy: { prop: keyof T | string; order: 'ASC' | 'DESC' };
 	setSortBy: (sortBy: ValidatorListOrder<T>) => void;
-	filterValues: Record<keyof T, any>;
-	setFilterValues: Dispatch<SetStateAction<Record<keyof T, any>>>;
+	filterValues: Record<keyof T | string, any>;
+	setFilterValues: Dispatch<SetStateAction<Record<string | keyof T, any>>>;
 	extra?: React.ReactNode[];
 }) {
 	const filterElements = useMemo<Record<keyof T, JSX.Element | null>>(() => {

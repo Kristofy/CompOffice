@@ -7,7 +7,7 @@ import { participantValiadator } from '@/forms/schemas/order';
 export default function ParticipantPage() {
 	return (
 		<>
-			<ValidatorForm validator={participantValiadator} onSubmit={(data) => console.log(data)} />
+			<ValidatorForm dataHandler={participantValiadator} onSubmit={(data) => console.log(data)} />
 			<ValidatorList validator={participantValiadator} />;
 		</>
 	);

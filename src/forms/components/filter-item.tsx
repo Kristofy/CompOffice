@@ -1,14 +1,14 @@
 import { Input } from '@/components/ui/input';
-import { FormExtras, Validator } from '../type-info';
 import { SetStateAction } from 'react';
+import { DataHandler } from '../type-info';
 
 export interface WithFilter<T> {
-	data: T;
+	data: T & Record<string, any>;
 	filter: number;
 }
 
 export function getFilters<T extends object>(
-	validator: Validator<T>,
+	dataHandler: DataHandler<T>,
 	setFilterChanged: (
 		value: SetStateAction<{
 			filter: (target: any, data: T) => boolean;
@@ -16,11 +16,11 @@ export function getFilters<T extends object>(
 			index: number;
 		} | null>
 	) => void,
-	setValue: (value: Record<keyof T, string>) => void,
-	value: Record<keyof T, string>
+	setValue: (value: Record<keyof T | string, string>) => void,
+	value: Record<keyof T | string, string>
 ) {
 	return Object.fromEntries(
-		Object.entries<FormExtras<T>>(validator.extras).map(([key, extras], index) => {
+		Object.entries(dataHandler.columns.all).map(([key, extras], index) => {
 			const filter = extras.filter;
 			if (!filter) {
 				return [key, null];
@@ -37,7 +37,7 @@ export function getFilters<T extends object>(
 						setFilterChanged({ filter: filter, value: e.target.value, index: index });
 						setValue({
 							...value,
-							[key as keyof T]: e.target.value,
+							[key as keyof T | string]: e.target.value,
 						});
 					}}
 				/>,
