@@ -1,19 +1,11 @@
-import { UseQueryResult } from '@tanstack/react-query';
-import {
-	Schema,
-	ZodNumber,
-	ZodObject,
-	ZodRawShape,
-	ZodSchema,
-	ZodString,
-	number,
-	unknown,
-	z,
-} from 'zod';
-import { unit } from '@prisma/client';
-import { FormType } from './form-config';
 import { ReactNode } from 'react';
+
+import { Schema, z, ZodObject, ZodSchema } from 'zod';
+
+import { UseQueryResult } from '@tanstack/react-query';
+
 import { getLayout } from './default-layout';
+import { FormType } from './form-config';
 
 /**
  * Data Handler Utility types
@@ -37,15 +29,29 @@ interface DataHandlerSchema<T extends object> {
 	form: ZodObject<KeyWithZodSchema<T>>;
 }
 
+export interface TableOrder<T> {
+	prop: keyof T | string;
+	order: 'ASC' | 'DESC';
+}
+
+interface DataHandlerTableHeaderProps<Model extends object> {
+	dataHandler: DataHandler<Model>;
+	filterValues: Record<keyof Model | string, any>;
+}
+
 /**
  * T is the object of all files
  * U is the current fieds infered type
  */
-export interface FormProps<T extends object, K> {
+export interface FormProps<
+	T extends object,
+	K,
+	A extends 'Additional' | 'Model' | 'All' = 'Model',
+> {
 	type?: FormType;
 	filter?: ({ target, data }: { target: K; data: T }) => boolean;
 	// TODO(Kristofy): This is sortable and filterable optionally
-	header?: ({ filter }: { filter: ReactNode }) => ReactNode;
+	header?: <Model extends object>(props: DataHandlerTableHeaderProps<Model>) => ReactNode;
 	default?: K;
 	min?: number;
 	max?: number;
@@ -53,6 +59,11 @@ export interface FormProps<T extends object, K> {
 	hidden?: boolean;
 	unique?: boolean;
 	required?: boolean;
+	calc?: A extends 'Model'
+		? never
+		: A extends 'Additinal'
+			? ({ data }: { data: T }) => unknown
+			: undefined | (({ data }: { data: T }) => unknown);
 }
 
 type DataHandlerConfigModel<Property> = {
@@ -64,23 +75,18 @@ type DataHandlerConfigModel<Property> = {
 type DataHandlerConfigAdditional<Model extends object> = {
 	api?: never;
 	form?: never;
-	calc?: ({ data }: { data: Model }) => unknown;
+	calc?: ({ data }: { data: Model }) => any;
 };
-
-type FromFormZodSchema<K> = DataHandlerConfigModel<K>['form'] extends undefined
-	? undefined
-	: z.input<Exclude<DataHandlerConfigModel<K>['form'], undefined>>;
-type FromCalc<Model extends object> = DataHandlerConfigAdditional<Model>['calc'] extends undefined
-	? undefined
-	: ReturnType<Exclude<DataHandlerConfigAdditional<Model>['calc'], undefined>>;
 
 interface DataHandlerConfig<Model extends object, Additional extends object> {
 	server: DataHandlerServer<Model>;
 	fields: {
-		[K in keyof Model]: DataHandlerConfigModel<Model[K]> & FormProps<Model & Additional, K>;
+		[K in keyof Model]: DataHandlerConfigModel<Model[K]> &
+			FormProps<Model & Additional, Model[K], 'Model'>;
 	};
 	additional?: {
-		[K in keyof Additional]: DataHandlerConfigAdditional<Model> & FormProps<Model, FromCalc<Model>>;
+		[K in keyof Additional]: DataHandlerConfigAdditional<Model> &
+			FormProps<Model, any, 'Additional'>;
 	};
 }
 
@@ -88,30 +94,32 @@ interface DataHandlerConfig<Model extends object, Additional extends object> {
  * Data Handler
  */
 
-export interface DataHandlerColumn<T extends object, U extends object, K> {
+export interface DataHandlerColumn<
+	T extends object,
+	U extends object,
+	A extends 'Additional' | 'Model' | 'All' = 'Model',
+> {
 	keys: (keyof T)[];
-	props: FormProps<U, K>;
+	props: {
+		[K in keyof U]: FormProps<U, U[K], A>;
+	};
 }
 
 // HA filed FormProps<Model & Additional, K>
 // Ha additional FormProps<Model, FromCalc<Model>>
-interface DataHandlerColumnTypes<
-	Model extends object,
-	K extends keyof Model,
-	Additional extends object,
-> {
-	model: DataHandlerColumn<Model, Model & Additional, K>;
-	additional: DataHandlerColumn<Additional, Model, FromCalc<Model>>;
-	all: DataHandlerColumn<Additional & Model, Model & Additional, K | FromCalc<Model>>;
+interface DataHandlerColumnTypes<Model extends object, Additional extends object> {
+	model: DataHandlerColumn<Model, Model & Additional, 'Model'>;
+	additional: DataHandlerColumn<Additional, Model & Additional, 'Additional'>;
+	all: DataHandlerColumn<Additional & Model, Model & Additional, 'All'>;
 }
 
 interface DataHandlerFormProps<Model extends object, Additional extends object> {
-	columnLayout: ReactNode;
+	getColumnLayout: (hiddenColumns: Record<keyof Model | string, boolean>) => ReactNode;
 }
 
 export class DataHandler<Model extends object> {
 	schema: DataHandlerSchema<Model>;
-	columns: DataHandlerColumnTypes<Model, keyof Model, Record<string, any>>;
+	columns: DataHandlerColumnTypes<Model, Record<string, any>>;
 	server: DataHandlerServer<Model>;
 	form: DataHandlerFormProps<Model, Record<string, any>>;
 
@@ -121,13 +129,13 @@ export class DataHandler<Model extends object> {
 
 		const modelEntries = Object.entries<any>(fields) as [
 			keyof Model,
-			DataHandlerConfigModel<any> & FormProps<Model & Record<string, any>, any>,
+			DataHandlerConfigModel<any> & FormProps<Model & Record<string, any>, any, 'Model'>,
 		][];
 		const additionalEntries = !additional
 			? []
 			: (Object.entries<any>(additional) as [
 					keyof Record<string, any>,
-					DataHandlerConfigAdditional<any> & FormProps<Model, FromCalc<Model>>,
+					DataHandlerConfigAdditional<any> & FormProps<Model, any, 'Additional'>,
 				][]);
 
 		const modelKeys = modelEntries.map(([key]) => key) as (keyof Model)[];
@@ -136,13 +144,21 @@ export class DataHandler<Model extends object> {
 		const modelProps = Object.fromEntries(
 			modelEntries.map(([key, { api, form, calc, ...props }]) => [key, { ...props }])
 		) as {
-			[K in keyof Model]: FormProps<Model & Record<string, any>, K>;
+			[K in keyof Model | string]: FormProps<
+				Model & Record<string, any>,
+				(Model & Record<string, any>)[K],
+				'Model'
+			>;
 		};
 
 		const additionalProps = Object.fromEntries(
-			additionalEntries.map(([key, { calc, api, form, ...props }]) => [key, { ...props }])
+			additionalEntries.map(([key, { api, form, ...props }]) => [key, { ...props }])
 		) as {
-			[K in keyof Record<string, any>]: FormProps<Model, FromCalc<Model>>;
+			[K in keyof (Model & Record<string, any>)]: FormProps<
+				Model & Record<string, any>,
+				(Model & Record<string, any>)[K],
+				'Additional'
+			>;
 		};
 
 		const apiSchemas = modelEntries.map(([key, { api }]) => [key, api]);
@@ -176,7 +192,8 @@ export class DataHandler<Model extends object> {
 		};
 
 		this.form = {
-			columnLayout: getLayout(this.columns.all.props),
+			getColumnLayout: (hiddenColumns: Record<keyof Model | string, boolean>) =>
+				getLayout(this.columns.all.props, hiddenColumns),
 		};
 	}
 }

@@ -1,15 +1,12 @@
-import type { Metadata } from 'next';
 import './globals.css';
-import { Toaster } from 'react-hot-toast';
+
+import type { Metadata } from 'next';
 import { SessionProvider } from 'next-auth/react';
-import AuthProvider from './auth-provider';
 import { Inter as FontSans } from 'next/font/google';
-
-import { cn } from '@/lib/utils';
-import { auth } from '@/auth';
 import Link from 'next/link';
-import TRPCProvider from '@/trpc/client/Provider';
+import { Toaster } from 'react-hot-toast';
 
+import { auth } from '@/auth';
 import {
 	Menubar,
 	MenubarCheckboxItem,
@@ -25,6 +22,10 @@ import {
 	MenubarSubTrigger,
 	MenubarTrigger,
 } from '@/components/ui/menubar';
+import { cn } from '@/lib/utils';
+import TRPCProvider from '@/trpc/client/Provider';
+
+import AuthProvider from './auth-provider';
 
 const fontSans = FontSans({
 	subsets: ['latin'],
@@ -51,6 +52,13 @@ export default async function RootLayout({
 						className={cn('min-h-screen bg-secondary font-sans antialiased', fontSans.variable)}>
 						<AuthProvider>
 							<Menubar>
+								<MenubarMenu>
+									<MenubarTrigger>
+										<Link href="/" shallow>
+											Home
+										</Link>
+									</MenubarTrigger>
+								</MenubarMenu>
 								<MenubarMenu>
 									<MenubarTrigger>Services</MenubarTrigger>
 									<MenubarContent>
@@ -166,7 +174,7 @@ export default async function RootLayout({
 							</Menubar>
 							{children}
 						</AuthProvider>
-						{/* <Toaster /> */}
+						<Toaster position="top-right" reverseOrder={false} />
 					</body>
 				</html>
 			</TRPCProvider>

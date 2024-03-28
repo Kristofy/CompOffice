@@ -12,9 +12,6 @@ export const unitValidator = new DataHandler<unit>({
 			form: z.string().min(1).pipe(z.coerce.number()),
 			api: z.number(),
 			type: 'number',
-			filter({ target, data }) {
-				return data.id.toString().toLowerCase().includes(target.toLowerCase());
-			},
 		},
 		code: {
 			form: z.string().min(1).max(50),
@@ -26,7 +23,10 @@ export const unitValidator = new DataHandler<unit>({
 			form: z.string().nullable(),
 			api: z.string().min(1).max(500),
 			type: 'string',
-			filter: ({ target, data }) => !!data.name?.toLowerCase().includes(target.toLowerCase()),
+			filter: ({ target, data }) => {
+				if (!target) return true;
+				return !!data.name?.toLowerCase().includes(target.toLowerCase());
+			},
 		},
 		status: {
 			form: z.enum(['A', 'I']),
@@ -44,8 +44,7 @@ export const unitValidator = new DataHandler<unit>({
 			form: z.string().min(1).pipe(z.coerce.number()),
 			api: z.number().nullable(),
 			type: 'number',
-			filter: ({ target, data }) =>
-				!!data.topic?.toString().toLowerCase().includes(target.toLowerCase()),
+			hidden: true,
 		},
 		list_price_HUF: {
 			form: z.string().min(1).pipe(z.coerce.number().min(0)).nullable(),
@@ -61,6 +60,16 @@ export const unitValidator = new DataHandler<unit>({
 			form: z.string().min(1).pipe(z.coerce.number().min(0)).nullable(),
 			api: z.number().nullable(),
 			type: 'number',
+		},
+	},
+	additional: {
+		testing: {
+			calc: ({ data }) => {
+				return data.id % 2;
+			},
+			filter: ({ target, data }: { target: string; data: unit & Record<string, any> }) => {
+				return parseInt(target) % 2 === data.testing;
+			},
 		},
 	},
 });

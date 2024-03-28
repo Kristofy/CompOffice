@@ -43,6 +43,27 @@ body {
 	}
 }
 
+/* width */
+::-webkit-scrollbar {
+	width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+	/* same color as the background but lighten up a bit */
+	background: lighten(var(--background), 10%);
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+	background: var(--primary);
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+	background: var(--accent);
+}
+
 @layer base {
 	* {
 		@apply border-border;

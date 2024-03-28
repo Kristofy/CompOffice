@@ -47,4 +47,14 @@ export const participantValiadator = new DataHandler<participant>({
 			type: 'number',
 		},
 	},
+	additional: {
+		test: {
+			calc: ({ data }) => {
+				return 'Hello World!';
+			},
+			header: ({}) => {
+				return 'Test column';
+			},
+		},
+	},
 });
