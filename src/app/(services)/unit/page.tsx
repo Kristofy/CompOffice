@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import toast from 'react-hot-toast';
 import { z } from 'zod';
@@ -71,39 +71,42 @@ export default function UnitPage() {
 		console.log(data);
 	}, []);
 
-	const contextMenu: ContextMenuField<unit>[] = [
-		{
-			name: 'Copy',
-			onClick: (data, key) => {
-				navigator.clipboard.writeText(data[key]);
+	const contextMenu: ContextMenuField<unit>[] = useMemo(
+		() => [
+			{
+				name: 'Copy',
+				onClick: (data, key) => {
+					navigator.clipboard.writeText(data[key]);
+				},
 			},
-		},
-		{
-			name: 'Delete',
-			onClick: (data, key) => {
-				console.log('Delete', data, key);
+			{
+				name: 'Delete',
+				onClick: (data, key) => {
+					console.log('Delete', data, key);
+				},
 			},
-		},
-		{
-			name: 'Edit',
-			onClick: (data, key) => {
-				console.log('Edit', data, key);
-				toast.success(`Editing ${data}`);
+			{
+				name: 'Edit',
+				onClick: (data, key) => {
+					console.log('Edit', data, key);
+					toast.success(`Editing ${data}`);
+				},
 			},
-		},
-		{
-			name: 'View',
-			onClick: (data, key) => {
-				console.log('View', data, key);
+			{
+				name: 'View',
+				onClick: (data, key) => {
+					console.log('View', data, key);
+				},
 			},
-		},
-		{
-			name: 'New',
-			onClick: (data, key) => {
-				console.log('New', data, key);
+			{
+				name: 'New',
+				onClick: (data, key) => {
+					console.log('New', data, key);
+				},
 			},
-		},
-	];
+		],
+		[]
+	);
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>

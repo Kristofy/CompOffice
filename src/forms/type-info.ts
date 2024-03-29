@@ -4,7 +4,7 @@ import { Schema, z, ZodObject, ZodSchema } from 'zod';
 
 import { UseQueryResult } from '@tanstack/react-query';
 
-import { getLayout } from './default-layout';
+import { getGridLayout, getLayout } from './default-layout';
 import { FormType } from './form-config';
 
 /**
@@ -115,6 +115,7 @@ interface DataHandlerColumnTypes<Model extends object, Additional extends object
 
 interface DataHandlerFormProps<Model extends object, Additional extends object> {
 	getColumnLayout: (hiddenColumns: Record<keyof Model | string, boolean>) => ReactNode;
+	getGridLayout: (hiddenColumns: Record<keyof Model | string, boolean>) => string;
 }
 
 export class DataHandler<Model extends object> {
@@ -194,6 +195,8 @@ export class DataHandler<Model extends object> {
 		this.form = {
 			getColumnLayout: (hiddenColumns: Record<keyof Model | string, boolean>) =>
 				getLayout(this.columns.all.props, hiddenColumns),
+			getGridLayout: (hiddenColumns: Record<keyof Model | string, boolean>) =>
+				getGridLayout(this.columns.all.props, hiddenColumns),
 		};
 	}
 }
