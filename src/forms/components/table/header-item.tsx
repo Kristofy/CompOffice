@@ -76,7 +76,7 @@ export default function HeaderItem<T extends object>({
 				value={filterValue}
 			/>
 		);
-	}, [changeHandler, dataHandler, index, name, props, setFilterChanged]);
+	}, [changeHandler, dataHandler, filterValue, index, name, props, setFilterChanged]);
 
 	const contextMenuContent = useMemo(() => {
 		console.log('context menu rebuilt');
@@ -171,12 +171,12 @@ export default function HeaderItem<T extends object>({
 											})
 										) : (
 											<>
-												<div className="inline-block w-full self-center">
-													<small className="text-md font-light w-min">
+												<div className="inline-block w-full self-center truncate">
+													<small className="text-md font-light">
 														{filterValues[name as keyof T]}
 													</small>
 												</div>
-												<div className="w-full h-full flex flex-row items-center justify-center">
+												<div className="w-full h-full flex flex-row items-center justify-center overflow-hidden text-nowrap">
 													{sortBy.prop === (name as keyof T) && (
 														<>
 															{sortBy.order === 'ASC' ? <FaSortAmountUp /> : <FaSortAmountDown />}

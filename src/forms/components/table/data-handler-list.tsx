@@ -67,12 +67,18 @@ export default function DataHandlerList<T extends object>({
 	onRowClick,
 	contextMenuFields,
 }: DataHandlerListProps<T>) {
+	const [optimizationLevel, setOptimizationLevel] = useState<'None' | 'Pre1' | 'Pre2'>('None');
+
 	const calculateRow = useCallback(
 		(
 			currentElement: Record<string | keyof T, React.ReactNode>,
 			currentValue: T & Record<string, any>,
 			index: number
 		) => {
+			if (!currentElement) {
+				return null;
+			}
+
 			return (
 				<tr className={`hover:bg-accent ${index % 2 ? 'bg-secondary' : 'bg-secondary/75'}`}>
 					{Object.entries<React.ReactNode>(currentElement)
@@ -116,6 +122,7 @@ export default function DataHandlerList<T extends object>({
 	const preComputedRows = useRef<React.ReactNode[] | null>(null);
 
 	useEffect(() => {
+		setOptimizationLevel('None');
 		preComputedRowProps.current = null;
 		preComputedRows.current = null;
 
@@ -125,7 +132,7 @@ export default function DataHandlerList<T extends object>({
 			preComputedRowProps.current = data.map((current, index) => {
 				return row({ data: current, index });
 			});
-			console.log('precomputed row props');
+			setOptimizationLevel('Pre1');
 
 			// after an additional few seconds precompute the whole list
 			inner_timeout = setTimeout(() => {
@@ -136,7 +143,7 @@ export default function DataHandlerList<T extends object>({
 						index
 					);
 				});
-				console.log('precomputed rows');
+				setOptimizationLevel('Pre2');
 			}, 1000);
 		}, 1000);
 
@@ -149,11 +156,11 @@ export default function DataHandlerList<T extends object>({
 	}, [calculateRow, data, row]);
 
 	const Row = ({ index, style }: { index: number; style: any }) => {
-		if (preComputedRows.current) {
+		if (optimizationLevel === 'Pre2' && preComputedRows.current) {
 			return preComputedRows.current[index];
 		}
 
-		if (preComputedRowProps.current) {
+		if (optimizationLevel === 'Pre1' && preComputedRowProps.current) {
 			const currentElement = preComputedRowProps.current[index];
 			return calculateRow(currentElement, data[index], index);
 		}
@@ -172,12 +179,10 @@ export default function DataHandlerList<T extends object>({
 	 */
 	const [overscan, setOverscan] = useState(1);
 	useEffect(() => {
-		console.log('Set overscan to 1');
 		setOverscan(1);
 		const timeout = setTimeout(() => {
-			console.log('Set overscan to 7');
 			setOverscan(7);
-		}, 800);
+		}, 10000);
 
 		return () => clearTimeout(timeout);
 	}, [data]);

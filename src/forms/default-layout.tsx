@@ -17,5 +17,5 @@ export function getGridLayout<Model extends object>(
 	const visible = Object.entries(allFields).filter(([k, v]) => !hiddenColumns[k]);
 	// const total = visible.reduce((acc, [k, v]) => acc + (v.ratio ?? 1), 0);
 
-	return visible.map(([k, v]) => `${v.ratio ?? 1}fr`).join(' ');
+	return visible.map(([k, v]) => `minmax(0, ${v.ratio ?? 1}fr)`).join(' ');
 }
