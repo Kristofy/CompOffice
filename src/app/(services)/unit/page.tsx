@@ -64,6 +64,7 @@ export default function UnitPage() {
 	const [open, setOpen] = useState(false);
 
 	const handleRowClick = useCallback((data: unit & Record<string, any>, index: number) => {
+		console.log('Row Click', data, index);
 		setOpen(true);
 	}, []);
 

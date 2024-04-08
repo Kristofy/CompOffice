@@ -12,7 +12,6 @@ function wait(ms: number) {
 
 export const getRouter = t.router({
 	units: t.procedure.query(async () => {
-		await wait(1000);
 		return prisma.unit.findMany();
 	}),
 	participants: t.procedure.query(async () => {

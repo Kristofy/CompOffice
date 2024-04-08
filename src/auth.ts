@@ -11,20 +11,25 @@ export const { handlers: { GET, POST }, auth, signIn, signOut, } = NextAuth({
       name: "Dev Auth Provider",
       credentials: {
         name: { label: "Username", type: "text", placeholder: "jsmith" },
-        email: { label: "Username", type: "text", placeholder: "jsmith" },
+        email: { label: "Email", type: "email", placeholder: "jsmith@example.com" },
+        password: { label: "Password", type: "password", placeholder: "" },
       },
       async authorize(credentials) {
-        if (credentials?.name === "admin") {
-            return null;
-        }
-        
-        const user: any = {
-          // id: v4(),
-          name: credentials?.name || "hey",
-          email: credentials?.email || "ho",
-          // image: null,
+
+        if (credentials?.name === "reject"
+          || credentials?.name === null
+          || credentials?.email === null
+          || credentials?.password === null) {
+
+          return null;
+
         }
 
+        const user = {
+          id: 1,
+          name: credentials.name,
+          email: credentials.email,
+        };
 
         return user
       }
@@ -59,7 +64,7 @@ export const { handlers: { GET, POST }, auth, signIn, signOut, } = NextAuth({
       //   session.user.role = token.role as any;
       // }
 
-    
+
       // if (session.user) {
       //   session.user.name = token.name;
       //   session.user.email = token.email;
@@ -72,5 +77,5 @@ export const { handlers: { GET, POST }, auth, signIn, signOut, } = NextAuth({
     //   return token;
     // }
   },
-  
+
 });

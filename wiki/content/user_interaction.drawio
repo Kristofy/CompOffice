@@ -1,0 +1,178 @@
+<mxfile host="app.diagrams.net" modified="2024-04-01T19:32:38.821Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" etag="vTx-ynGBbDnHVc1nbi76" version="24.2.1" type="device">
+  <diagram name="Page-1" id="GBj5iKv1wh0PbMnMIuHy">
+    <mxGraphModel dx="1024" dy="586" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="EJuAX2CbbpujH-HPQyCx-14" value="Client / Általános tábla" style="swimlane;startSize=20;horizontal=1;childLayout=flowLayout;flowOrientation=north;resizable=0;interRankCellSpacing=50;containerType=tree;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="80" y="100" width="400" height="370" as="geometry" />
+        </mxCell>
+        <mxCell id="EJuAX2CbbpujH-HPQyCx-15" value="Listázás" style="whiteSpace=wrap;html=1;" vertex="1" parent="EJuAX2CbbpujH-HPQyCx-14">
+          <mxGeometry x="150" y="40" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="EJuAX2CbbpujH-HPQyCx-16" value="Szűrés" style="whiteSpace=wrap;html=1;" vertex="1" parent="EJuAX2CbbpujH-HPQyCx-14">
+          <mxGeometry x="20" y="130" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="EJuAX2CbbpujH-HPQyCx-17" value="" style="html=1;rounded=1;curved=0;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;startSize=6;endSize=6;noEdgeStyle=1;orthogonal=1;" edge="1" parent="EJuAX2CbbpujH-HPQyCx-14" source="EJuAX2CbbpujH-HPQyCx-15" target="EJuAX2CbbpujH-HPQyCx-16">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="170" y="92" />
+              <mxPoint x="70" y="118" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EJuAX2CbbpujH-HPQyCx-40" value="Gépelésre" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="EJuAX2CbbpujH-HPQyCx-17">
+          <mxGeometry x="0.21" y="-1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EJuAX2CbbpujH-HPQyCx-18" value="Rendezés" style="whiteSpace=wrap;html=1;" vertex="1" parent="EJuAX2CbbpujH-HPQyCx-14">
+          <mxGeometry x="150" y="130" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="EJuAX2CbbpujH-HPQyCx-19" value="" style="html=1;rounded=1;curved=0;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;startSize=6;endSize=6;noEdgeStyle=1;orthogonal=1;" edge="1" parent="EJuAX2CbbpujH-HPQyCx-14" source="EJuAX2CbbpujH-HPQyCx-15" target="EJuAX2CbbpujH-HPQyCx-18">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="200" y="94" />
+              <mxPoint x="200" y="118" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EJuAX2CbbpujH-HPQyCx-41" value="Kattintásra" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="EJuAX2CbbpujH-HPQyCx-19">
+          <mxGeometry x="-0.1701" y="-3" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EJuAX2CbbpujH-HPQyCx-22" value="" style="html=1;rounded=1;curved=0;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;startSize=6;endSize=6;noEdgeStyle=1;orthogonal=1;entryX=0.6;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="EJuAX2CbbpujH-HPQyCx-14" source="EJuAX2CbbpujH-HPQyCx-18" target="EJuAX2CbbpujH-HPQyCx-37">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="940" y="1700" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="200" y="182" />
+              <mxPoint x="200" y="206" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EJuAX2CbbpujH-HPQyCx-36" value="" style="html=1;rounded=1;curved=0;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;startSize=6;endSize=6;noEdgeStyle=1;orthogonal=1;" edge="1" target="EJuAX2CbbpujH-HPQyCx-37" source="EJuAX2CbbpujH-HPQyCx-16" parent="EJuAX2CbbpujH-HPQyCx-14">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="873" y="1540" as="sourcePoint" />
+            <Array as="points">
+              <mxPoint x="70" y="182" />
+              <mxPoint x="170" y="208" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EJuAX2CbbpujH-HPQyCx-37" value="Frissített Lista" style="whiteSpace=wrap;html=1;" vertex="1" parent="EJuAX2CbbpujH-HPQyCx-14">
+          <mxGeometry x="150" y="220" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="EJuAX2CbbpujH-HPQyCx-42" value="" style="html=1;rounded=1;curved=0;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;startSize=6;endSize=6;noEdgeStyle=1;orthogonal=1;" edge="1" target="EJuAX2CbbpujH-HPQyCx-43" source="EJuAX2CbbpujH-HPQyCx-37" parent="EJuAX2CbbpujH-HPQyCx-14">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="570" y="1110" as="sourcePoint" />
+            <Array as="points">
+              <mxPoint x="170" y="272" />
+              <mxPoint x="70" y="298" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EJuAX2CbbpujH-HPQyCx-43" value="Szerkesztés" style="whiteSpace=wrap;html=1;" vertex="1" parent="EJuAX2CbbpujH-HPQyCx-14">
+          <mxGeometry x="20" y="310" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="EJuAX2CbbpujH-HPQyCx-47" value="" style="html=1;rounded=1;curved=0;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;startSize=6;endSize=6;noEdgeStyle=1;orthogonal=1;" edge="1" target="EJuAX2CbbpujH-HPQyCx-48" source="EJuAX2CbbpujH-HPQyCx-37" parent="EJuAX2CbbpujH-HPQyCx-14">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="515" y="960" as="sourcePoint" />
+            <Array as="points">
+              <mxPoint x="200" y="274" />
+              <mxPoint x="200" y="298" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EJuAX2CbbpujH-HPQyCx-49" value="" style="html=1;rounded=1;curved=0;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;startSize=6;endSize=6;noEdgeStyle=1;orthogonal=1;" edge="1" target="EJuAX2CbbpujH-HPQyCx-50" source="EJuAX2CbbpujH-HPQyCx-37" parent="EJuAX2CbbpujH-HPQyCx-14">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="410" y="790" as="sourcePoint" />
+            <Array as="points">
+              <mxPoint x="230" y="272" />
+              <mxPoint x="330" y="298" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EJuAX2CbbpujH-HPQyCx-50" value="Új" style="whiteSpace=wrap;html=1;" vertex="1" parent="EJuAX2CbbpujH-HPQyCx-14">
+          <mxGeometry x="280" y="310" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="EJuAX2CbbpujH-HPQyCx-51" value="" style="html=1;rounded=1;curved=0;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;startSize=6;endSize=6;noEdgeStyle=1;orthogonal=1;" edge="1" target="EJuAX2CbbpujH-HPQyCx-53" source="EJuAX2CbbpujH-HPQyCx-15" parent="EJuAX2CbbpujH-HPQyCx-14">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="523" y="620" as="sourcePoint" />
+            <Array as="points">
+              <mxPoint x="230" y="92" />
+              <mxPoint x="330" y="118" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EJuAX2CbbpujH-HPQyCx-52" value="Kattintásra" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="EJuAX2CbbpujH-HPQyCx-51">
+          <mxGeometry x="-0.1701" y="-3" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EJuAX2CbbpujH-HPQyCx-54" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;noEdgeStyle=1;orthogonal=1;curved=1;" edge="1" parent="EJuAX2CbbpujH-HPQyCx-14" source="EJuAX2CbbpujH-HPQyCx-53" target="EJuAX2CbbpujH-HPQyCx-37">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="330" y="182" />
+              <mxPoint x="230" y="208" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EJuAX2CbbpujH-HPQyCx-53" value="Oszlopok elrejtése" style="whiteSpace=wrap;html=1;" vertex="1" parent="EJuAX2CbbpujH-HPQyCx-14">
+          <mxGeometry x="280" y="130" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="EJuAX2CbbpujH-HPQyCx-48" value="Törlés" style="whiteSpace=wrap;html=1;" vertex="1" parent="EJuAX2CbbpujH-HPQyCx-14">
+          <mxGeometry x="150" y="310" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="EJuAX2CbbpujH-HPQyCx-61" value="Server metódus, autentikált és authorizált esemény" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="520" width="400" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="EJuAX2CbbpujH-HPQyCx-63" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="EJuAX2CbbpujH-HPQyCx-48" target="EJuAX2CbbpujH-HPQyCx-61">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="EJuAX2CbbpujH-HPQyCx-64" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.823;entryY=0.016;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="EJuAX2CbbpujH-HPQyCx-50" target="EJuAX2CbbpujH-HPQyCx-61">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="EJuAX2CbbpujH-HPQyCx-62" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.176;entryY=0.005;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="EJuAX2CbbpujH-HPQyCx-43" target="EJuAX2CbbpujH-HPQyCx-61">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="170" y="563" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="150" y="516" />
+              <mxPoint x="150" y="516" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EJuAX2CbbpujH-HPQyCx-69" value="" style="endArrow=classic;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;exitX=0.323;exitY=-0.012;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.379;entryY=0.982;entryDx=0;entryDy=0;entryPerimeter=0;startArrow=none;startFill=0;endFill=1;" edge="1" parent="1" source="EJuAX2CbbpujH-HPQyCx-61" target="EJuAX2CbbpujH-HPQyCx-37">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="210" y="500" as="sourcePoint" />
+            <mxPoint x="260" y="400" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="210" y="400" />
+              <mxPoint x="260" y="400" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EJuAX2CbbpujH-HPQyCx-71" value="Válasz / Frissítés" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="EJuAX2CbbpujH-HPQyCx-69">
+          <mxGeometry x="-0.7363" relative="1" as="geometry">
+            <mxPoint y="-1" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EJuAX2CbbpujH-HPQyCx-70" value="" style="endArrow=classic;dashed=1;html=1;dashPattern=1 3;strokeWidth=2;rounded=0;exitX=0.672;exitY=-0.068;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.633;entryY=1.025;entryDx=0;entryDy=0;entryPerimeter=0;startArrow=none;startFill=0;endFill=1;" edge="1" parent="1" source="EJuAX2CbbpujH-HPQyCx-61" target="EJuAX2CbbpujH-HPQyCx-37">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="219" y="529" as="sourcePoint" />
+            <mxPoint x="272" y="372" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="350" y="400" />
+              <mxPoint x="300" y="400" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EJuAX2CbbpujH-HPQyCx-72" value="Válasz / Frissítés" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="EJuAX2CbbpujH-HPQyCx-70">
+          <mxGeometry x="-0.8115" y="-2" relative="1" as="geometry">
+            <mxPoint y="-7" as="offset" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

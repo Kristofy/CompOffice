@@ -9,3 +9,7 @@
 \pagebreak
 
 [{(developer/functional.md)}]
+
+\pagebreak
+
+[{(developer/flows.md)}]

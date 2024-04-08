@@ -534,7 +534,7 @@ Számlák
   - `payment_date`: Kifizetés dátuma
   - `delivery_date`: Beérkezés dátuma
   - `transfer_date`: Átutalás dátuma
-  - `actual_report_date`: TODO(Kristofy): Pontosítani
+  - `actual_report_date`: Időpont a kumutatásokhoz
   - `paid`: Kifizetés státusza
   - `status`: Számla státusza (valós, tervezett)
   - `accounting`: Könyvelt vagy sem

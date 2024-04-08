@@ -181,7 +181,7 @@ export default function DataHandlerList<T extends object>({
 	useEffect(() => {
 		setOverscan(1);
 		const timeout = setTimeout(() => {
-			setOverscan(7);
+			setOverscan(21);
 		}, 10000);
 
 		return () => clearTimeout(timeout);
