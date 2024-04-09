@@ -6,15 +6,13 @@ import { Inter as FontSans } from 'next/font/google';
 import Link from 'next/link';
 import { Toaster } from 'react-hot-toast';
 
-import { auth } from '@/auth';
+import { auth, signOut } from '@/auth';
 import {
 	Menubar,
 	MenubarCheckboxItem,
 	MenubarContent,
 	MenubarItem,
 	MenubarMenu,
-	MenubarRadioGroup,
-	MenubarRadioItem,
 	MenubarSeparator,
 	MenubarShortcut,
 	MenubarSub,
@@ -51,6 +49,14 @@ export default async function RootLayout({
 					<body
 						className={cn('min-h-screen bg-secondary font-sans antialiased', fontSans.variable)}>
 						<AuthProvider>
+							<form
+								action={async () => {
+									'use server';
+
+									await signOut();
+								}}>
+								<button type="submit">Sign out</button>;
+							</form>
 							<Menubar>
 								<MenubarMenu>
 									<MenubarTrigger>
@@ -158,17 +164,9 @@ export default async function RootLayout({
 									</MenubarContent>
 								</MenubarMenu>
 								<MenubarMenu>
-									<MenubarTrigger>Profiles</MenubarTrigger>
+									<MenubarTrigger>Settings</MenubarTrigger>
 									<MenubarContent>
-										<MenubarRadioGroup value="benoit">
-											<MenubarRadioItem value="andy">Andy</MenubarRadioItem>
-											<MenubarRadioItem value="benoit">Benoit</MenubarRadioItem>
-											<MenubarRadioItem value="Luis">Luis</MenubarRadioItem>
-										</MenubarRadioGroup>
-										<MenubarSeparator />
-										<MenubarItem inset>Edit...</MenubarItem>
-										<MenubarSeparator />
-										<MenubarItem inset>Add Profile...</MenubarItem>
+										<MenubarItem inset></MenubarItem>
 									</MenubarContent>
 								</MenubarMenu>
 							</Menubar>
