@@ -6,10 +6,11 @@ import {
 	ContextMenu,
 	ContextMenuContent,
 	ContextMenuItem,
-	ContextMenuTrigger,
+	ContextMenuLabel,
 } from '@/components/ui/context-menu';
+import { ContextMenuTrigger } from '@radix-ui/react-context-menu';
 
-import { DataHandler } from '../../type-info';
+import { DataHandler, FormProps } from '../../type-info';
 import VirtualTable from './virtual-table';
 
 type RowFunction<T> = ({
@@ -42,22 +43,6 @@ type DataHandlerRowContextMenuProps<T extends object> = {
 	property: keyof T | string;
 };
 
-function DataHandlerRowContextMenu<T extends object>({
-	fields,
-	data,
-	property,
-}: DataHandlerRowContextMenuProps<T>) {
-	return (
-		<ContextMenuContent>
-			{fields?.map(({ name, onClick }) => (
-				<ContextMenuItem key={name} inset onSelect={() => onClick(data, property)}>
-					{name}
-				</ContextMenuItem>
-			))}
-		</ContextMenuContent>
-	);
-}
-
 export default function DataHandlerList<T extends object>({
 	row,
 	data,
@@ -84,30 +69,34 @@ export default function DataHandlerList<T extends object>({
 					{Object.entries<React.ReactNode>(currentElement)
 						.filter(([key, _]) => !hiddenColumns[key])
 						.map(([key, value]) => (
+							// <td
+							// 	key={key as string}
+							// 	className="m-0 p-0"
+							// 	style={{ height: size, overflow: 'hidden' }}>
+							// 	<ContextMenu>
+							// 		<ContextMenuTrigger
+							// 			style={{ display: 'block', height: size, overflow: 'hidden' }}>
+							// 			{value}
+							// 		</ContextMenuTrigger>
+							// 		<DataHandlerRowContextMenu
+							// 			property={key}
+							// 			data={currentValue}
+							// 			fields={contextMenuFields}
+							// 		/>
+							// 	</ContextMenu>
+							// </td>
+
 							<td
 								key={key as string}
 								className="m-0 p-0"
 								style={{ height: size, overflow: 'hidden' }}>
-								<ContextMenu>
-									<ContextMenuTrigger
-										style={{ display: 'block', height: size, overflow: 'hidden' }}
-										onSelect={() => {
-											onRowClick?.({ ...currentValue }, index);
-										}}>
-										{value}
-									</ContextMenuTrigger>
-									<DataHandlerRowContextMenu
-										property={key}
-										data={currentValue}
-										fields={contextMenuFields}
-									/>
-								</ContextMenu>
+								<div style={{ display: 'block', height: size, overflow: 'hidden' }}>{value}</div>
 							</td>
 						))}
 				</tr>
 			);
 		},
-		[contextMenuFields, hiddenColumns, onRowClick, size]
+		[hiddenColumns, size]
 	);
 
 	/**
@@ -155,7 +144,8 @@ export default function DataHandlerList<T extends object>({
 		};
 	}, [calculateRow, data, row]);
 
-	const Row = ({ index, style }: { index: number; style: any }) => {
+	// TOOD(Krisotfy): Why is this not a state?
+	const Row = ({ index }: { index: number }) => {
 		if (optimizationLevel === 'Pre2' && preComputedRows.current) {
 			return preComputedRows.current[index];
 		}
@@ -187,21 +177,69 @@ export default function DataHandlerList<T extends object>({
 		return () => clearTimeout(timeout);
 	}, [data]);
 
+	const [contextMenuContent, setContextMenuContent] = useState<React.ReactNode | null>(null);
+
+	const handleContext = useCallback(
+		(index: number, colIndex: number) => {
+			// set key to the colIndex th key of the datas wisible keys
+			const visibleKeys = Object.entries<FormProps<T & Record<string, any>, any, 'All'>>(
+				dataHandler.columns.all.props
+			)
+				.filter(([k, v]) => !hiddenColumns[k])
+				.map(([k, v]) => k);
+
+			if (colIndex < 0 || colIndex >= visibleKeys.length) {
+				setContextMenuContent(null);
+				return;
+			}
+
+			const key = visibleKeys[colIndex];
+
+			setContextMenuContent(
+				<ContextMenuContent>
+					<ContextMenuLabel>{key}</ContextMenuLabel>
+					{contextMenuFields?.map(({ name, onClick }) => (
+						<ContextMenuItem key={name} inset onSelect={() => onClick(data[index], key)}>
+							{name}
+						</ContextMenuItem>
+					))}
+				</ContextMenuContent>
+			);
+		},
+		[contextMenuFields, data, dataHandler, hiddenColumns]
+	);
+
+	const handleRowClick = useCallback(
+		(index: number) => {
+			onRowClick?.(data[index], index);
+		},
+		[data, onRowClick]
+	);
+
 	return (
-		<div className="block w-full h-full m-0">
-			<AutoResizer>
-				{({ height, width }) => (
-					<VirtualTable
-						height={height}
-						width={width}
-						itemCount={data.length}
-						itemSize={size}
-						overscanCount={overscan}
-						columnLayout={<colgroup>{columnLayout}</colgroup>}
-						row={Row}
-					/>
-				)}
-			</AutoResizer>
-		</div>
+		<>
+			<div className="block w-full h-full m-0">
+				<AutoResizer>
+					{({ height, width }) => (
+						<ContextMenu>
+							<ContextMenuTrigger>
+								<VirtualTable
+									height={height}
+									width={width}
+									itemCount={data.length}
+									itemSize={size}
+									overscanCount={overscan}
+									onContextMenu={handleContext}
+									onRowClick={handleRowClick}
+									columnLayout={<colgroup>{columnLayout}</colgroup>}
+									row={Row}
+								/>
+							</ContextMenuTrigger>
+							{contextMenuContent}
+						</ContextMenu>
+					)}
+				</AutoResizer>
+			</div>
+		</>
 	);
 }

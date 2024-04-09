@@ -15,7 +15,6 @@ export const envSchema = z.object({
 	 */
 	NEXTAUTH_URL: z.string().url(),
 
-	BASE_URL: z.string().url(),
 	/**
 	 * you can generate one with openssl rand -base64 32
 	 */

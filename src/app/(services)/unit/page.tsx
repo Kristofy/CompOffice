@@ -25,7 +25,7 @@ import { unitValidator } from '@/forms/schemas/services';
 import { unit } from '@prisma/client';
 
 // Defautl on row click will Pull up a dialog
-export function DefaultFormDialog<T extends object>(data: T & Record<string, any>) {
+function DefaultFormDialog<T extends object>(data: T & Record<string, any>) {
 	return (
 		<Dialog>
 			<DialogTrigger asChild>

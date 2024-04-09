@@ -2,7 +2,7 @@ import NextAuth from "next-auth"
 import { ENV } from "./server/env";
 import AzureADProvider from "next-auth/providers/azure-ad";
 import CredentialsProvider from "next-auth/providers/credentials";
-
+import { ExtendedUser } from "./next-auth";
 
 export const { handlers: { GET, POST }, auth, signIn, signOut, } = NextAuth({
   session: { strategy: "jwt" },
@@ -25,10 +25,11 @@ export const { handlers: { GET, POST }, auth, signIn, signOut, } = NextAuth({
 
         }
 
-        const user = {
-          id: 1,
-          name: credentials.name,
-          email: credentials.email,
+        const user: ExtendedUser = {
+          id: "hey1",
+          role: "admin",
+          name: credentials?.name as string ?? "",
+          email: credentials.email as string ?? "",
         };
 
         return user
