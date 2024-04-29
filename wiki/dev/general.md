@@ -1,8 +1,7 @@
 ### Általános műveletek nem lehetségesek a megfelelő jogosultság nélkü
 
 
-
-**Az oldal nem tölt be adatot, és hibát ad, ha a felhasználó megfelelő jogosultság nélkül látogat egy oldalt**  
+#### Az oldal nem tölt be adatot, és hibát ad, ha a felhasználó megfelelő jogosultság nélkül látogat egy oldalt
 
 _Given_ A felhasználó bejelentkezett
 
@@ -10,8 +9,7 @@ _When_ A oldal látogatása AND A felhasználónak nincs megtekintés jogosults�
 
 _Then_ Az oldal nem tölt be adatot, és hibát ad.
 
-
-**Az oldalakon nem módosíthat jogosultság nélkül**  
+#### Az oldalakon nem módosíthat jogosultság nélkül
 
 _Given_ A felhasználó bejelentkezett
 
@@ -19,8 +17,7 @@ _When_ A oldal látogatása AND A felhasználónak nincs módosítás jogosults�
 
 _Then_ Az oldalakon nem módosíthat.
 
-
-**Az oldalakon nem törölhet jogosultság nélkül**  
+#### Az oldalakon nem törölhet jogosultság nélkül
 
 _Given_ A felhasználó bejelentkezett
 
@@ -28,8 +25,7 @@ _When_ A oldal látogatása AND A felhasználónak nincs törlés jogosultsága 
 
 _Then_ Az oldalakon nem törölhet.
 
-
-**Az oldalakon nem hozzáadhat jogosultság nélkül**  
+#### Az oldalakon nem hozzáadhat jogosultság nélkül
 
 _Given_ A felhasználó bejelentkezett
 
@@ -37,8 +33,7 @@ _When_ A oldal látogatása AND A felhasználónak nincs hozzáadás jogosultsá
 
 _Then_ Az oldalakon nem hozzáadhat.
 
-
-**Törlés esetén mindig mergerősíttést kérünk**  
+#### Törlés esetén mindig mergerősíttést kérünk
 
 _Given_ A felhasználó bejelentkezett
 
