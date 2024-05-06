@@ -16,7 +16,7 @@ Given('A felhasználó fiókja Azure AD-ben megengedett', () => {
 });
 
 When('Oldal látogatása', () => {
-
+hey
 });
 
 Then('Automatikus bejelentkeztetés', () => {
@@ -32,9 +32,6 @@ Given('A felhasználó fiókja Azure AD-ben nem megengedett', () => {
 	// TOOD(Kristofy): Azure integráció lecserélése
 });
 
-When('Oldal látogatása', () => {
-
-});
 
 Then('Az oldal visszautasítja a bejelentkezést', () => {
 
