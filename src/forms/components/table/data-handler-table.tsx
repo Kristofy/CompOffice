@@ -166,7 +166,7 @@ export default function DataHandlerTable<T extends object>({
 
 		return (
 			<>
-				<div className="container mx-auto p-2 h-full w-full flex flex-col">
+				<div className="container mx-auto m-3 h-full w-full flex flex-col">
 					{header}
 					{status === 'loading' && 'Loading...'}
 					{status === 'success' && (

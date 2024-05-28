@@ -1,85 +1,105 @@
-A következő funkciókat teljesítti a program:
+---
+title: 'Szakdolgozat'
+author: Osztopáni Kristóf
+date: '2024-03-20'
+subject: 'Markdown'
+keywords: [Markdown, Example]
+subtitle: 'CompOffice  - Kurzus és pénzügyi adminisztárció'
+lang: 'hu'
+titlepage: true,
+titlepage-text-color: '424242'
+titlepage-rule-color: '360049'
+titlepage-rule-height: 0
+---
 
-A funkcionális követelményeket egyesével nem vizsgáljuk, mert azokközül a legtöbb az általános listázás funkcióval teljesül, a végső állapotban azonban az összes funkció saját részt kap az e2e tesztekben.
 
-- [x] Létezik autentikáció, két fajta, egy dev (amely csak mockok és tesztelésre való) és egy éles Azure Authentikáció.
-- [ ] Autorizáció még nincs
-- [x] Létezik általnos listázás funkció, így az összes oldal látogatható és a lista megjelnik.
-- [x] Létezik egy általános form, így az összes elem szerkeszthető.
-- [x] Az általános form validációval rendelkezik.
-- [x] Az általános form hibakezeléssel rendelkezik.
-- [x] Az általános form módosíttása a szerveren is ellenőrzés után megtörténik.
-- [ ] Optimisztikus módosíttás még nincs
-- [x] Több réteges cachelés
-- [x] A lista kijelzése gyors és dinamikus
-- [x] Listában az oszlopok rendezhetőek
-- [x] Listában az oszlopok szűrhetőek
-- [x] Listában az oszlopok megjeleníthetőek / elrejthetőek
-- [x] A lista rendezése / szűrése / megjeleníttése megtörténik, valamint gyors, közel azonnali visszajelzést adnak
-- [x] List elemre jobbkikkelve megjelenik egy kontextus menü
-- [x] kontextus menúből a felhasználó módosítthat
-- [x] kontextus menúből a felhasználó törölhet
-- [ ] kontextus menúből a felhasználó klónozhat
-- [x] kontextus menúből a felhasználó Új elemet létrehozat
-- [x] (A kontextus menü gyors, csak egy mindig regisztrált event listener van a teljes listán)
-- [x] A navigációs sáv létezik és a menüpontok működnek
+[{(content/title.md)}]
 
-- [ ] Főoldal nincs
-- [ ] A komplikált oldalk, amelyeken nem használható az általános megoldások nincsenek
-  > Ezek a project listázás oldal, valamint a kurzus szerkesztő oldal.
-  > Továbbá a kalendár nézet, valamint az email küldő oldal.
-  > (A kalendár nézet mögötti kód már elérhető, viszont kliens oldalon még nincs megjelenítve)
-- [x] Automatikus tesztelés van
-  > A tesztek Gherskin formátumban íródnak, majd js-ben kóddal definiálják a tesztelendő funkciókat.
-  > A tesztek a `cypress` keretrendszerrel működnek a `cucumber` bővítménnyel(gherskinhez)
-- [x] A dokumnetáció teljes mértékben "élő", tehát a kódbázis változásával változik
-- [x] Típushelyesség elérhető az adatbázis - szerver - kliens között
-- [x] Kód formátum, igyekszem a kódot tisztán tartani, és managelhető részekre bontani
-  > A kód nagy része a jövőben JSDoc formátummal lesz kommentelve, így a kódbázis dokumentációja is teljesen élő lesz.
-- [ ] Az oldalak nagy része nem reszponzív, ennek javíttása sok időt igényel, és a probléma alacsony prioritású
-  > Sok időt igényel, mert a listák virtualizálása a pozición múllik. (A form már reszponzív)
-  > Alacsony prioritású, mert a felhasználók nagy része kizárólag asztali gépen használja az alkalmazást.
+\pagebreak
 
-## Külön kitérve a nem funckionális követelményekre
+[{(content/intro.md)}]
 
-**Hatékonyság**:
+\pagebreak
 
-- [x] Az alkalmazás gyors
-- [x] A nagy mennyiségű adatokat nem pagerrel hanem lista virtualizálással megoldja
-- [ ] Az adatmódosíttás nem optimisztikusan történik
-- [x] Van kliensoldali gyorsítótár
+[{(content/developer-docs.md)}]
 
-**Biztonság**:
+\pagebreak
 
-- [x] Minden kommunkációt csak autentikát felhasználó végezhet (természetesen a bejelentkezést kivéve)
-- [x] Ismert támadási módszerek ellen védett
-  > Ez nem az én érdemem én, csak kipróbáltam és utánna olvastam, a keretrendszerek végzik a munkát.
-  > SQL Injection nem lehetséges, mert a paraméterek nem stringként kerülnek átadásra, és felhasználás előtt helyesen fel vannak dolgozva az ORM által.
-  > XSS React garantálja hogy a <> {} </> formátumban beillesztett adatok előzőleg helyesen transformálva lesznek
-  > CSRF nem lehetséges, Auth.js (régebben NextAuth) lekezeli
-  > Brute force támadások ellen nem védett a dev verzió, de az éles verzió igen, hiszen a bejelentkeztetést az éles verzióban kizárólag az Azur Microsoft Authentikáció végzi.
-  > DDOS támadások ellen nem védett, ha szükséges akkor deployment után betehető CloudeFlare ddos véddelem mögé
+# A szoftver architektúra terve
 
-**Megbízhatóság**:
+## Az adatbázis
 
-- [x] A kommunikáció típushelyes, és a tRCP rest api-t is biztosít
-- [ ] Az események nincsenek naplózva
+Az adatbázis tervezésekor a következő szempontokat vettük figyelembe:
 
-**Felhasználói felület**:
+- A lehető legkevesebb redundancia, viszont a használat alatt különböző workaroundokhoz bekerültek redundáns / aggregált adatok.
 
-- [x] A felület ergonomikus és könnyen kezelhető.
-- [ ] A felület kényelmes új felhasználók számára
-- [x] lehetőséget ad a gyorsabb munkára a tapasztalt felhasználók számára.
-- [ ] Még nem lehetőséget ad a gyorsabb munkára a tapasztalt
-      felhasználók számára.
-  > A kódbázisban kezdetleges global search és shortcut support már van, de még nincs megjelenítve
-- [ ] Az alkalmazásnak reszponzívnak kellene lennie
+  - Az adatbázis a cég tulajdona így a sémáját mósosíttani a dolgozatomnak nem része, azonban amint a régi megoldásokat átültetjük az új rendszerbe, a redundáns adatokat tartalmazó mezőket eltávolítjuk.
 
-**Platformfüggetlenség**:
+- Az adatbázist Azure Ms SQL valósítja meg, viszont ezt az adatbázis ORM elfedi, és lehetővé teszi bármely más adatbázis használatát is a későbbiekben, a kód módosítása nélkül.
 
-- [x] Az alkalmazás kliens oldala Chromium alapú böngészőkön és Firefoxon működik, ezekhez külön külön futtatható az e2e test.
-- [x] A server oldal tetszőleges linux szerveren működik.
+- Az adatbázit **entity-relationship diagrammal** modelleztük, így ezzel is lessz bemutatva
 
-**Szükséges Erőforrások**:
+[{(dev/database.md)}]
 
-- [x] Jelenleg minden követelmény teljesítt, de ez nem reprezentaív a végleges állapotra nézve, hiszen az alkalmazás még nem teljes
+## Az "üzelti logika"
+
+Az alkalmazás alapja egy egyszerű réteg az addatbázis fölé, ahol a felhasználó egyszerűen tudja kezelni az adatokat, és a felhasználói felületen keresztül tudja azokat módosítani.
+
+**GET**  
+A szerver oldal így a legtöbb esetben egy-az-egyben visszaadja a táblák tartalmát, általában a kapcsolt táblák tartalmával együtt.
+
+**POST**
+A felület minden esetben ellenőrzi az adatbázis megszoríttásait, és a típuson kívül semmi mást, így az adatbázis a "source of truth".
+
+Ennél fogva az üzleti logika nem tartalmaz semmilyen bonyolult számíttást, vagy adat aggregációt, hiszen ha szükséges, akkor ezeket az adatbázisban valósítjuk meg.
+
+Habár van pár plusz funkció, amely nem a felettébb leírt módon műkködik, ezek a következők:
+
+- A felhasználó bejelentkeztetése
+- A felhasználó jogosultságainak ellenőrzése
+- Automatikus emailek küldése
+- A kalendárhoz szükséges adatok felépíttése
+  > Ez nagyon sok számíttás, ezért a nagy részét nem az adatbázis, hanem a szerver valósítja meg.
+
+A szerver oldallal ellentétben a kliens oldal felépíttése sokkal bonyolultabb, hiszen a felhasználói felületnek sokkal több funkciót kell ellátnia, mint a szerver oldalnak.
+
+A kliens oldalnak fel kell tudni dolgozni effektíven a szerver által küldött adatokat, melyek a teljes táblákat tarttalmazza. Ez a következő okokból történik így:
+
+**Az egyben küldés előnyei:**
+
+- A legtöbb adatunk nem "time-series" adat, így nem éri meg szerver oldalon darabolni és csak részleteket küldeni, mert a kliens oldalon keresés / rendezés esetén más adatokra lesz szükségünk.
+- Habár ilyenkor lehetne újabb kérést küldeni a szervernek, azonban ez sokkal lassabb lenne, mint egyszerre az összes adatot elküldeni.
+- Egy küldés során client -> server -> db -> server -> client úton megy az adat, ami lassú válaszidőhöz vezet, főként a szerver és a db közötti kapcsolat miatt.
+- A teljes tábla elküldése nem jelent nagy terhelést a szerverre, hiszen a legtöbb esetben a táblák mérete nem nagy, és a szerver könnyen tudja ezeket a kéréseket kezelni.
+- Ebben az esetben a kliens oldal nem küld network requesteket keresés vagy rendezés esetén, így a felhasználói élmény sokkal jobb lesz.
+
+**Az egyben küldés hátrányai:**
+
+- Az oldal betöltése lassabb lesz, mivel a kliens oldalnak meg kell várnia az összes adatot, mielőtt megjelenítené az oldalt.
+
+  > Itt a JSON packet mérete a probléma, amit különböző módszerekkel lehetne csökkenteni, mint például a gzip használata, vagy a felesleges mezők kihagyása vagy teljes serializálás formátumát lecsréletjük Protobuf-ra. Azonban jeleneleg erre nem volt még szükség.
+  > A táblák mérete miatt ez nem nagy probléma, továbbá, többrétegű cache implementációt használunk, így a kliens oldalnak nem kell minden kérésnél újra lekérnie az adatokat.
+
+- Az adatok módosíttása, esetén le kellene kérni ismételten az adatokat.
+
+  > Ezt optimisztikus frissíttéssel megoldhatjuk, úgy hogy a frissítést kliens oldali ellenőrzés után elküldjük a szervernek, de ameddig a válasz nem érkezik meg, addig a kliens oldal már a módosíttott adatokat mutatja(A kliens optimisztikus). És a szerver oldal ilyenkor visszaküldi az új adatot / hibát, és a kliens leköveti a változásokat.
+
+- A kliens oldali gyorsíttótár elavulhat, és ezt nem vesszük észre
+
+  > Az oldal betültésekkor a kliens feliratkozik a változásokra, így a kliens értesül a változásokról, és frissíti a gyorsíttótárat. Így a kliens oldal mindig naprakész lesz.
+  > Ez a gyakorlatban egy web socket ideális esetben, ha nem elérhető akkor valami azonos funkciót "trükk rest api-on keresztül"(pl. long polling).
+
+- A felhasználói élmény érdekében a kliens oldal sem végez darabolást a hagyományos értelemben("pagination"), habár ez nem elvárás, viszont ha megvalósíttjuk naívan, akkor a kliens oldal lassú lesz, a rengeteg DOM elem miatt. És a keresések és rendezések is lassúak lesznek, mivel a DOM manipuláció sok időt vesz igénybe.
+  > A teljes tábla megjeleníttése helyett, a domot folyamatosan módosíttjuk úgy hogy csak a látható elemeket töltjük be dinamikusan a DOM-ba.
+
+## A kliens
+
+A kliens oldal az előbbiek alapján egy elég bonyolult rendszer, mely sok különböző folyamatból áll.
+
+Ezeket a folyamatokat a következő pontokban jobban kifejtem
+
+[{(content/developer/flows.md)}]
+
+## Drótváztervek
+
+[{(content/developer/wireframes.md)}]

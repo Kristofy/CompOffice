@@ -224,7 +224,7 @@ export default function DataHandlerList<T extends object>({
 						<ContextMenu>
 							<ContextMenuTrigger>
 								<VirtualTable
-									height={height}
+									height={height - 60}
 									width={width}
 									itemCount={data.length}
 									itemSize={size}

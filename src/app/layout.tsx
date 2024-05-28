@@ -49,14 +49,6 @@ export default async function RootLayout({
 					<body
 						className={cn('min-h-screen bg-secondary font-sans antialiased', fontSans.variable)}>
 						<AuthProvider>
-							<form
-								action={async () => {
-									'use server';
-
-									await signOut();
-								}}>
-								<button type="submit">Sign out</button>;
-							</form>
 							<Menubar>
 								<MenubarMenu>
 									<MenubarTrigger>
@@ -166,9 +158,17 @@ export default async function RootLayout({
 								<MenubarMenu>
 									<MenubarTrigger>Settings</MenubarTrigger>
 									<MenubarContent>
-										<MenubarItem inset></MenubarItem>
+										<form
+											action={async () => {
+												'use server';
+
+												await signOut();
+											}}>
+											<button type="submit">Sign out</button>
+										</form>
 									</MenubarContent>
 								</MenubarMenu>
+
 							</Menubar>
 							{children}
 						</AuthProvider>

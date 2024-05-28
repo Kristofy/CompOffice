@@ -16,7 +16,6 @@ Given('A felhasználó fiókja Azure AD-ben megengedett', () => {
 });
 
 When('Oldal látogatása', () => {
-hey
 });
 
 Then('Automatikus bejelentkeztetés', () => {

@@ -15,7 +15,11 @@ export const getRouter = t.router({
 		return prisma.unit.findMany();
 	}),
 	participants: t.procedure.query(async () => {
-		return prisma.participant.findMany();
+		const result = await prisma.participant.findMany();
+		return result.map((item) => ({
+			...item,
+			test_elek: 'Heyyy from the server',
+		}));
 	}),
 	unit: t.procedure
 		.input(

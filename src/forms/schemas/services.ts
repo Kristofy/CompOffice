@@ -64,7 +64,7 @@ export const unitValidator = new DataHandler<unit>({
 	},
 	additional: {
 		testing: {
-			calc: ({ data }) => {
+			calc: ({ data } : { data: unit }) => {
 				return data.id % 2;
 			},
 			filter: ({ target, data }: { target: string; data: unit & Record<string, any> }) => {

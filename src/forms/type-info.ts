@@ -15,8 +15,12 @@ type KeyWithZodSchema<T> = Required<{
 	[K in keyof T]: z.ZodType<T[K]>;
 }>;
 
-interface DataHandlerServer<Model extends object> {
-	useQuery: () => UseQueryResult<Model[], any>;
+interface DataHandlerServer<Model extends object, ServerProp> {
+	useQuery: () => UseQueryResult<(Model & ServerProp)[], any>;
+	fields?: {
+		[K in keyof ServerProp]: DataHandlerConfigAdditional<Model> &
+			FormProps<Model, ServerProp[K], 'Server'>;
+	};
 }
 
 interface DataHandlerConfigSchema<T> {
@@ -39,18 +43,13 @@ interface DataHandlerTableHeaderProps<Model extends object> {
 	filterValues: Record<keyof Model | string, any>;
 }
 
-/**
- * T is the object of all files
- * U is the current fieds infered type
- */
 export interface FormProps<
 	T extends object,
 	K,
-	A extends 'Additional' | 'Model' | 'All' = 'Model',
+	A extends 'Additional' | 'Model' | 'All' | 'Server' = 'Model',
 > {
 	type?: FormType;
 	filter?: ({ target, data }: { target: K; data: T }) => boolean;
-	// TODO(Kristofy): This is sortable and filterable optionally
 	header?: <Model extends object>(props: DataHandlerTableHeaderProps<Model>) => ReactNode;
 	default?: K;
 	min?: number;
@@ -62,8 +61,10 @@ export interface FormProps<
 	calc?: A extends 'Model'
 		? never
 		: A extends 'Additinal'
-			? ({ data }: { data: T }) => unknown
-			: undefined | (({ data }: { data: T }) => unknown);
+			? ({ data }: { data: T }) => any
+			: A extends 'Server'
+				? ({ data }: { data: T }) => any
+				: any;
 }
 
 type DataHandlerConfigModel<Property> = {
@@ -78,8 +79,12 @@ type DataHandlerConfigAdditional<Model extends object> = {
 	calc?: ({ data }: { data: Model }) => any;
 };
 
-interface DataHandlerConfig<Model extends object, Additional extends object> {
-	server: DataHandlerServer<Model>;
+interface DataHandlerConfig<
+	Model extends object,
+	Additional extends object,
+	Server extends object,
+> {
+	server: DataHandlerServer<Model, Server>;
 	fields: {
 		[K in keyof Model]: DataHandlerConfigModel<Model[K]> &
 			FormProps<Model & Additional, Model[K], 'Model'>;
@@ -97,7 +102,7 @@ interface DataHandlerConfig<Model extends object, Additional extends object> {
 export interface DataHandlerColumn<
 	T extends object,
 	U extends object,
-	A extends 'Additional' | 'Model' | 'All' = 'Model',
+	A extends 'Additional' | 'Server' | 'Model' | 'All' = 'Model',
 > {
 	keys: (keyof T)[];
 	props: {
@@ -107,10 +112,15 @@ export interface DataHandlerColumn<
 
 // HA filed FormProps<Model & Additional, K>
 // Ha additional FormProps<Model, FromCalc<Model>>
-interface DataHandlerColumnTypes<Model extends object, Additional extends object> {
-	model: DataHandlerColumn<Model, Model & Additional, 'Model'>;
-	additional: DataHandlerColumn<Additional, Model & Additional, 'Additional'>;
-	all: DataHandlerColumn<Additional & Model, Model & Additional, 'All'>;
+interface DataHandlerColumnTypes<
+	Model extends object,
+	Additional extends object,
+	ServerProp extends object,
+> {
+	model: DataHandlerColumn<Model, Model & Additional & ServerProp, 'Model'>;
+	server: DataHandlerColumn<ServerProp, Model & ServerProp & ServerProp, 'Server'>;
+	additional: DataHandlerColumn<Additional, Model & Additional & ServerProp, 'Additional'>;
+	all: DataHandlerColumn<Additional & ServerProp & Model, Model & Additional & ServerProp, 'All'>;
 }
 
 interface DataHandlerFormProps<Model extends object, Additional extends object> {
@@ -120,12 +130,16 @@ interface DataHandlerFormProps<Model extends object, Additional extends object> 
 
 export class DataHandler<Model extends object> {
 	schema: DataHandlerSchema<Model>;
-	columns: DataHandlerColumnTypes<Model, Record<string, any>>;
-	server: DataHandlerServer<Model>;
+	columns: DataHandlerColumnTypes<Model, Record<string, any>, Record<string, any>>;
+	server: DataHandlerServer<Model, Record<string, any>>;
 	form: DataHandlerFormProps<Model, Record<string, any>>;
 
 	// TODO(Kristofy): We should make sure that there is no overlap between the keys of the model and the additional fields
-	constructor({ server, fields, additional }: DataHandlerConfig<Model, Record<string, any>>) {
+	constructor({
+		server,
+		fields,
+		additional,
+	}: DataHandlerConfig<Model, Record<string, any>, Record<string, any>>) {
 		this.server = server;
 
 		const modelEntries = Object.entries<any>(fields) as [
@@ -139,8 +153,14 @@ export class DataHandler<Model extends object> {
 					DataHandlerConfigAdditional<any> & FormProps<Model, any, 'Additional'>,
 				][]);
 
+		const serverEntries = Object.entries<any>(server.fields ?? {}) as [
+			keyof Record<string, any>,
+			DataHandlerConfigModel<any> & FormProps<Model & Record<string, any>, any, 'Server'>,
+		][];
+
 		const modelKeys = modelEntries.map(([key]) => key) as (keyof Model)[];
 		const additionalKeys = additionalEntries.map(([key]) => key) as string[];
+		const serverKeys = serverEntries.map(([key]) => key) as string[];
 
 		const modelProps = Object.fromEntries(
 			modelEntries.map(([key, { api, form, calc, ...props }]) => [key, { ...props }])
@@ -162,6 +182,16 @@ export class DataHandler<Model extends object> {
 			>;
 		};
 
+		const serverProps = Object.fromEntries(
+			serverEntries.map(([key, { api, form, ...props }]) => [key, { ...props }])
+		) as {
+			[K in keyof (Model & Record<string, any>)]: FormProps<
+				Model & Record<string, any>,
+				(Model & Record<string, any>)[K],
+				'Server'
+			>;
+		};
+
 		const apiSchemas = modelEntries.map(([key, { api }]) => [key, api]);
 		const apiSchema = z.object(
 			Object.fromEntries(apiSchemas) as { [K in keyof Model]: ZodSchema<Model[K]> }
@@ -177,13 +207,17 @@ export class DataHandler<Model extends object> {
 				keys: modelKeys,
 				props: modelProps,
 			},
+			server: {
+				keys: serverKeys,
+				props: serverProps,
+			},
 			additional: {
 				keys: additionalKeys,
 				props: additionalProps,
 			},
 			all: {
-				keys: [...modelKeys, ...additionalKeys],
-				props: { ...modelProps, ...additionalProps },
+				keys: [...modelKeys, ...serverKeys, ...additionalKeys],
+				props: { ...modelProps, ...serverProps, ...additionalProps },
 			},
 		};
 

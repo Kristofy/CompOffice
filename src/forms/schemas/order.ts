@@ -21,6 +21,14 @@ import { trpc } from '@/trpc/client/client';
 export const participantValiadator = new DataHandler<participant>({
 	server: {
 		useQuery: trpc.get.participants.useQuery,
+		fields: {
+			test_elek: {
+				calc: ({ data }: { data: participant }) => {
+					return data.name;
+				},
+				type: 'string',
+			},
+		},
 	},
 	fields: {
 		id: {
@@ -49,7 +57,7 @@ export const participantValiadator = new DataHandler<participant>({
 	},
 	additional: {
 		test: {
-			calc: ({ data }) => {
+			calc: ({ data }: { data: participant }) => {
 				return 'Hello World!';
 			},
 			header: ({}) => {
