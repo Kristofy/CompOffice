@@ -16,7 +16,6 @@ type KeyWithZodSchema<T> = Required<{
 }>;
 
 interface DataHandlerServer<Model extends object, ServerProp> {
-	useQuery: () => UseQueryResult<(Model & ServerProp)[], any>;
 	fields?: {
 		[K in keyof ServerProp]: DataHandlerConfigAdditional<Model> &
 			FormProps<Model, ServerProp[K], 'Server'>;
@@ -49,6 +48,7 @@ export interface FormProps<
 	A extends 'Additional' | 'Model' | 'All' | 'Server' = 'Model',
 > {
 	type?: FormType;
+	displayName?: string;
 	filter?: ({ target, data }: { target: K; data: T }) => boolean;
 	header?: <Model extends object>(props: DataHandlerTableHeaderProps<Model>) => ReactNode;
 	default?: K;
@@ -93,6 +93,7 @@ interface DataHandlerConfig<
 		[K in keyof Additional]: DataHandlerConfigAdditional<Model> &
 			FormProps<Model, any, 'Additional'>;
 	};
+	tableName: string;
 }
 
 /**
@@ -133,12 +134,14 @@ export class DataHandler<Model extends object> {
 	columns: DataHandlerColumnTypes<Model, Record<string, any>, Record<string, any>>;
 	server: DataHandlerServer<Model, Record<string, any>>;
 	form: DataHandlerFormProps<Model, Record<string, any>>;
+	tableName: string;
 
 	// TODO(Kristofy): We should make sure that there is no overlap between the keys of the model and the additional fields
 	constructor({
 		server,
 		fields,
 		additional,
+		tableName,
 	}: DataHandlerConfig<Model, Record<string, any>, Record<string, any>>) {
 		this.server = server;
 
@@ -202,6 +205,7 @@ export class DataHandler<Model extends object> {
 			Object.fromEntries(formSchemas) as { [K in keyof Model]: Schema<any> }
 		) as ZodObject<KeyWithZodSchema<Model>>;
 
+		this.tableName = tableName;
 		this.columns = {
 			model: {
 				keys: modelKeys,

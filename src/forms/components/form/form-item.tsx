@@ -9,21 +9,37 @@ import {
 	FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select"
 
-import { FormProps } from '../../type-info';
+
+import { DataHandler, FormProps } from '../../type-info';
+import { useEffect } from 'react';
+import { serverGet, serverGetByTableName } from '@/trpc/client/client';
+import ConnectedFormItem from './items/connected';
 
 interface FormItemProps<T extends object> {
 	name: string;
 	// children: React.ReactNode;
 	props: FormProps<T, any>;
 	form: UseFormReturn<{ [x: string]: any }, any, undefined>;
+	dataHandler: DataHandler<T>;
+	data: (T & Record<string, any>)[];
 }
 
-export default function ValidatorFormItem<T extends object>({
+export default function DataHandlerFormItem<T extends object>({
 	name,
 	props,
 	form,
-}: FormItemProps<T>) {
+	dataHandler,
+	data,
+}: FormItemProps<T>
+) {
 	type Field = ControllerRenderProps<
 		{
 			[x: string]: any;
@@ -32,15 +48,43 @@ export default function ValidatorFormItem<T extends object>({
 	>;
 
 	const inputElement = (field: Field) => {
-		switch (props.type) {
+		console.log("props.type?.kind):", props.type?.kind)
+		switch (props.type?.kind) {
+			case 'string':
+				return <Input type="text" {...field} />;
 			case 'number':
 				return <Input type="number" {...field} />;
-			case 'string':
+			case 'enum':
 				return (
-					<>
-						<Input type="text" {...field} />
-					</>
+					// <select >
+					// 	{props.type.possibleValues.map(({ label, value }) => (
+					// 		<option key={label} value={value}>
+					// 			{label}
+					// 		</option>
+					// 	))}
+					// </select>
+					<Select onValueChange={field.onChange} defaultValue={field.value}>
+						<FormControl>
+							<SelectTrigger>
+								<SelectValue />
+							</SelectTrigger>
+						</FormControl>
+						<SelectContent>
+							{props.type.possibleValues.map(({ label, value }: { label: string, value: string }) => (
+								<SelectItem key={label} value={value}>{label}</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+
 				);
+			case 'connected':
+				return (
+					<ConnectedFormItem
+						field={field}
+						props={props as any}
+					/>
+				)
+
 			default:
 				return <Input type="text" {...field} />;
 		}
@@ -52,7 +96,7 @@ export default function ValidatorFormItem<T extends object>({
 			name={name}
 			render={({ field }) => (
 				<FormItem className="flex justify-center flex-col mt-0">
-					<FormLabel>{field.name}</FormLabel>
+					<FormLabel>{props.displayName ?? field.name}</FormLabel>
 					<FormControl>{inputElement(field)}</FormControl>
 					<FormDescription>This is your public display name.</FormDescription>
 					<FormMessage />

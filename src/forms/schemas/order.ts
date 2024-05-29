@@ -26,7 +26,9 @@ export const participantValiadator = new DataHandler<participant>({
 				calc: ({ data }: { data: participant }) => {
 					return data.name;
 				},
-				type: 'string',
+				type: {
+					kind: 'string',
+				},
 			},
 		},
 	},
@@ -34,12 +36,16 @@ export const participantValiadator = new DataHandler<participant>({
 		id: {
 			form: z.string().min(1).pipe(z.coerce.number()),
 			api: z.number().min(0),
-			type: 'number',
+			type: {
+				kind: 'number',
+			},
 		},
 		email: {
 			form: z.string().email(),
 			api: z.string().email(),
-			type: 'string',
+			type: {
+				kind: 'string',
+			},
 			filter({ target, data }) {
 				return data.email.toLowerCase().includes(target.toLowerCase());
 			},
@@ -47,12 +53,16 @@ export const participantValiadator = new DataHandler<participant>({
 		name: {
 			form: z.string(),
 			api: z.string(),
-			type: 'string',
+			type: {
+				kind: 'string',
+			},
 		},
 		customer: {
 			form: z.string().min(1).pipe(z.coerce.number()),
 			api: z.number(),
-			type: 'number',
+			type: {
+				kind: 'number',
+			},
 		},
 	},
 	additional: {

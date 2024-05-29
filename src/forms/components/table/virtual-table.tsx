@@ -24,9 +24,9 @@ const VirtualTableContext = createContext<{
 }>({
 	columnLayout: <></>,
 	top: 0,
-	handleContextMenu: (e: React.MouseEvent) => {},
-	handleRowClick: (e: React.MouseEvent) => {},
-	setTop: (value: number) => {},
+	handleContextMenu: (e: React.MouseEvent) => { },
+	handleRowClick: (e: React.MouseEvent) => { },
+	setTop: (value: number) => { },
 });
 
 /**
@@ -108,6 +108,7 @@ export default function VirtualTable({
 
 	const handleContextMenu = useCallback(
 		(e: React.MouseEvent) => {
+
 			if (!onContextMenu) return;
 
 			const colStarts = (() => {
@@ -133,7 +134,7 @@ export default function VirtualTable({
 
 			const windowListY = clientY - rectTop;
 			const listY = windowListY + top;
-			const clickedRowIndex = Math.round(listY / rest.itemSize);
+			const clickedRowIndex = Math.floor(listY / rest.itemSize);
 
 			// Lets figure out which column was clicked -> what is the key
 

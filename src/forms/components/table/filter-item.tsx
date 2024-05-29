@@ -45,7 +45,7 @@ export default function FilterItem<T extends object>({
 			<Input
 				key={name}
 				name={name}
-				type={props.type}
+				type={props.type?.kind}
 				placeholder={name}
 				defaultValue={value}
 				onKeyDown={(e) => {

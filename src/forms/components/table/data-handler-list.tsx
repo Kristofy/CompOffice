@@ -69,23 +69,6 @@ export default function DataHandlerList<T extends object>({
 					{Object.entries<React.ReactNode>(currentElement)
 						.filter(([key, _]) => !hiddenColumns[key])
 						.map(([key, value]) => (
-							// <td
-							// 	key={key as string}
-							// 	className="m-0 p-0"
-							// 	style={{ height: size, overflow: 'hidden' }}>
-							// 	<ContextMenu>
-							// 		<ContextMenuTrigger
-							// 			style={{ display: 'block', height: size, overflow: 'hidden' }}>
-							// 			{value}
-							// 		</ContextMenuTrigger>
-							// 		<DataHandlerRowContextMenu
-							// 			property={key}
-							// 			data={currentValue}
-							// 			fields={contextMenuFields}
-							// 		/>
-							// 	</ContextMenu>
-							// </td>
-
 							<td
 								key={key as string}
 								className="m-0 p-0"
@@ -172,7 +155,7 @@ export default function DataHandlerList<T extends object>({
 		setOverscan(1);
 		const timeout = setTimeout(() => {
 			setOverscan(21);
-		}, 10000);
+		}, 2500);
 
 		return () => clearTimeout(timeout);
 	}, [data]);

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, useOptimistic, useTransition } from 'react';
 
 import DataHandlerList, { ContextMenuField } from '@/forms/components/table/data-handler-list';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -8,17 +8,31 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { DataHandler, FormProps, TableOrder } from '../../type-info';
 import DataHandlerHeader from './data-handler-header';
 import { WithFilter } from './filter-item';
+import { string } from 'zod';
+import toast from 'react-hot-toast';
+import { serverGet, trpc } from '@/trpc/client/client';
+
+export type OptimisticAction<T> = {
+	type: 'update' | 'create' | 'delete';
+	payload: T & Record<string, any>;
+};
 
 interface DataHandlerTableProps<T extends object> {
 	dataHandler: DataHandler<T>;
 	onRowClick?: (data: T & Record<string, any>, index: number) => void;
 	contextMenuFields?: ContextMenuField<T>[];
+	optimisticUpdate?: OptimisticAction<T>,
+	handleSubmit?: (data: T & Record<string, any>) => Promise<boolean>;
+	setList?: (list: (T & Record<string, any>)[]) => void;
 }
 
 export default function DataHandlerTable<T extends object>({
 	dataHandler,
 	onRowClick,
 	contextMenuFields = [],
+	optimisticUpdate,
+	handleSubmit,
+	setList,
 }: DataHandlerTableProps<T>) {
 	type AllKey = DataHandler<T>['columns']['all']['keys'][number];
 	type AllType = T & Record<string, any>;
@@ -26,10 +40,14 @@ export default function DataHandlerTable<T extends object>({
 		prop: dataHandler.columns.all.keys[0]!,
 		order: 'DESC',
 	});
-	const { data: apiResponse, status } = dataHandler.server.useQuery();
+
+	const useQuery = serverGet(dataHandler);
+	const { data: apiResponse, status } = useQuery();
+
 	const sortedData = useRef<WithFilter<T>[]>([]);
+
 	const filteredData = useRef<WithFilter<T>[]>([]);
-	const [tableData, setTableData] = useState<T[]>([]);
+	const [tableData, setTableData] = useState<(T & Record<string, any>)[]>([]);
 	const [hiddenColumns, setHiddenColumns] = useState<Record<keyof T | string, boolean>>(
 		Object.fromEntries<boolean>(
 			Object.entries<FormProps<AllType, any, 'All'>>(dataHandler.columns.all.props).map(
@@ -49,9 +67,85 @@ export default function DataHandlerTable<T extends object>({
 		>
 	);
 
+
 	const defferedFilterValues = useDebounce(filterValues, 250);
 	const defferedFilterChanged = useDebounce(filterChanged, 250);
 	const defferedTableData = useDebounce(tableData, 600);
+
+
+	const [displayedTableData, setDisplayedTableData] = useState<(T & Record<string, any>)[]>([]);
+	useEffect(() => {
+		setDisplayedTableData(defferedTableData);
+		setList?.(defferedTableData);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [defferedTableData]);
+
+	useEffect(() => {
+		console.log('Optimistic update', optimisticUpdate);
+		if (!optimisticUpdate) {
+			return;
+		}
+
+		const update = async () => {
+			const reducer = (state: (T & Record<string, any>)[], action: OptimisticAction<T>) => {
+				switch (action.type) {
+					case 'update':
+						return state.map((p) => {
+							if (p.id === action.payload.id) {
+								return action.payload;
+							}
+							return p;
+						});
+					case 'create':
+						return [action.payload, ...state];
+					case 'delete':
+						return state.filter((p) => p.id !== action.payload.id);
+					default:
+						return state;
+				}
+			}
+
+
+			const serverProps = Object
+				.entries(dataHandler.columns.server.props)
+				.map(([key, props]) => [key, props.calc({ data: optimisticUpdate.payload })]);
+
+			const clientProps = Object
+				.entries(dataHandler.columns.additional.props)
+				.map(([key, props]) => [key, props.calc({ data: optimisticUpdate.payload })]);
+
+			const payload = {
+				...optimisticUpdate.payload,
+				...Object.fromEntries(serverProps),
+				...Object.fromEntries(clientProps),
+			};
+
+			const oldState = defferedTableData;
+
+			try {
+				const newState = reducer(defferedTableData, { type: optimisticUpdate.type, payload });
+				setDisplayedTableData(newState);
+
+				const shouldUpdate = await handleSubmit?.(payload);
+
+				if (!shouldUpdate) {
+					setDisplayedTableData(oldState);
+				}
+			} catch (err) {
+				setDisplayedTableData(oldState);
+				toast.error('Unexpected error');
+			}
+
+
+		};
+
+		update();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [dataHandler, optimisticUpdate]);
+
+
+	// When this is called from outside then update the table data
+
 
 	const Row = useMemo(
 		() =>
@@ -84,7 +178,7 @@ export default function DataHandlerTable<T extends object>({
 	}, [dataHandler]);
 
 	useEffect(() => {
-		// console.log('Data loaded');
+		console.log('Data loaded');
 		sortedData.current =
 			apiResponse?.map((p) => {
 				return { data: { ...p, ...fieldCalculators(p) }, filter: 0 } as WithFilter<T>;
@@ -109,7 +203,7 @@ export default function DataHandlerTable<T extends object>({
 	}, [sortedColumn]);
 
 	useEffect(() => {
-		console.log('Filter changed');
+		// console.log('Filter changed');
 		if (!defferedFilterChanged) {
 			setTableData(filteredData.current.filter((p) => p.filter === 0).map((p) => p.data));
 			return;
@@ -162,7 +256,7 @@ export default function DataHandlerTable<T extends object>({
 	);
 
 	const listComponent = useMemo(() => {
-		console.log('Rerender list');
+		// console.log('Rerender list');
 
 		return (
 			<>
@@ -172,7 +266,7 @@ export default function DataHandlerTable<T extends object>({
 					{status === 'success' && (
 						<DataHandlerList<T>
 							dataHandler={dataHandler}
-							data={defferedTableData}
+							data={displayedTableData}
 							row={Row}
 							size={45}
 							hiddenColumns={hiddenColumns}
@@ -187,7 +281,7 @@ export default function DataHandlerTable<T extends object>({
 		header,
 		status,
 		dataHandler,
-		defferedTableData,
+		displayedTableData,
 		Row,
 		hiddenColumns,
 		onRowClick,
