@@ -541,7 +541,7 @@ end
 
 ### A felhasználó be tud lépni az alkalmazásba
 
-**A felhasználó bejelentkezik**
+#### A felhasználó bejelentkezik
 
 _Given_ A felhasználó fiókja Azure AD-ben megengedett
 
@@ -549,7 +549,7 @@ _When_ Oldal látogatása
 
 _Then_ Automatikus bejelentkeztetés.
 
-**A felhasználó nem jelentkezhet be**
+#### A felhasználó nem jelentkezhet be
 
 _Given_ A felhasználó fiókja Azure AD-ben nem megengedett
 
@@ -557,7 +557,7 @@ _When_ Oldal látogatása
 
 _Then_ Az oldal visszautasítja a bejelentkezést.
 
-**A bejelentkezett felhasználó a főoldalra kerül**
+#### A bejelentkezett felhasználó a főoldalra kerül
 
 _Given_ A felhasználó bejelentkezett
 
@@ -565,7 +565,7 @@ _When_ Oldal látogatása
 
 _Then_ A főoldalra kerül.
 
-**A bejelentkezett felhasználó kijelentkezik**
+#### A bejelentkezett felhasználó kijelentkezik
 
 _Given_ A felhasználó bejelentkezett
 
@@ -573,7 +573,7 @@ _When_ Kijelentkezés
 
 _Then_ A bejelentkező oldalra kerül.
 
-**A felhasználónak megfeleő jogosultságai vannak**
+#### A felhasználónak megfeleő jogosultságai vannak
 
 _Given_ A felhasználó bejelentkezett
 
@@ -625,9 +625,11 @@ _Then_ Törlés esetén mindig mergerősíttést kérünk.
 
 ### Visszalépés
 
-**A felhasználó visszalép az előző oldalra**
+#### A felhasználó visszalép az előző oldalra
 
-_Given_ A felhasználó bejelentkezett AND Egy tetszőleges A oldalt majd B oldalt meglátogatott
+_Given_ A felhasználó bejelentkezett
+
+_Given_ Egy tetszőleges A oldalt majd B oldalt meglátogatott
 
 _When_ A felhasználó visszalép
 
@@ -871,7 +873,7 @@ _Then_ A Training Kalendár a jelenlegi hónapról indul.
 
 ### Modulok oldal
 
-**A felhasználó meglátogathatja a modulok oldalt**
+#### A felhasználó meglátogathatja a modulok oldalt
 
 _Given_ A felhasználó bejelentkezett
 
@@ -879,13 +881,13 @@ _When_ A felhasználónak van jogosultsága megtekinteni a modulok oldalt
 
 _Then_ A modulok oldal betölt.
 
-**A Szűrők megfelelően működnek, üres állapotból indulnak**
+#### A Szűrők megfelelően működnek, üres állapotból indulnak
 
 _Given_ A modulok oldal betölt
 
 _Then_ A szűrők megfelelően működnek, üres állapotból indulnak.
 
-**A kijelölt modul részletesen megjelenik**
+#### A kijelölt modul részletesen megjelenik
 
 _Given_ A modulok oldal betölt
 
@@ -893,7 +895,7 @@ _When_ A felhasználó kiválaszt egy modult
 
 _Then_ A kijelölt modul részletesen megjelenik.
 
-**Modulok módosíttása**
+#### Modulok módosíttása
 
 _Given_ A modulok oldal betölt AND felhasználónak van jogosultsága módosítani a modulok oldalon
 
@@ -901,7 +903,7 @@ _When_ A felhasználó a módosítás ikonra kattint
 
 _Then_ A modulok módosíttása lehetséges.
 
-**Modulok hozzáadássa lehetséges**
+#### Modulok hozzáadássa lehetséges
 
 _Given_ A modulok oldal betölt AND felhasználónak van jogosultsága módosítani a modulok oldalon
 
