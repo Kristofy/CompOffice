@@ -22,9 +22,14 @@ export interface ConnectedFormType extends BaseFormType {
 	connected_value: string;
 };
 
+// export interface BooleanFormType extends BaseFormType {
+// 	kind: 'boolean';
+// };
+
 export type FormType = (
 	| StringFormType
 	| NumberFormType
 	| EnumFormType
 	| ConnectedFormType
+	// | BooleanFormType
 );

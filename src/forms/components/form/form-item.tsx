@@ -19,7 +19,7 @@ import {
 
 
 import { DataHandler, FormProps } from '../../type-info';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { serverGet, serverGetByTableName } from '@/trpc/client/client';
 import ConnectedFormItem from './items/connected';
 
@@ -32,6 +32,18 @@ interface FormItemProps<T extends object> {
 	data: (T & Record<string, any>)[];
 }
 
+/**
+ * Renders a form item based on the provided props.
+ *
+ * @template T - The type of the object being rendered.
+ * @param {FormItemProps<T>} props - The props for the form item.
+ * @param {string} props.name - The name of the form item.
+ * @param {FormProps<T, any>} props.props - The props for the form item.
+ * @param {UseFormReturn<{ [x: string]: any }, any, undefined>} props.form - The form hook.
+ * @param {DataHandler<T>} props.dataHandler - The data handler for the form item.
+ * @param {(T & Record<string, any>)[]} props.data - The data for the form item.
+ * @return {JSX.Element} The rendered form item.
+ */
 export default function DataHandlerFormItem<T extends object>({
 	name,
 	props,
@@ -39,7 +51,7 @@ export default function DataHandlerFormItem<T extends object>({
 	dataHandler,
 	data,
 }: FormItemProps<T>
-) {
+): JSX.Element {
 	type Field = ControllerRenderProps<
 		{
 			[x: string]: any;
@@ -47,7 +59,13 @@ export default function DataHandlerFormItem<T extends object>({
 		string
 	>;
 
-	const inputElement = (field: Field) => {
+/**
+ * Generates the input element based on the type of the field.
+ *
+ * @param {Field} field - The field object.
+ * @return {JSX.Element} The generated input element.
+ */
+	const inputElement = (field: Field): JSX.Element => {
 		console.log("props.type?.kind):", props.type?.kind)
 		switch (props.type?.kind) {
 			case 'string':
@@ -75,7 +93,6 @@ export default function DataHandlerFormItem<T extends object>({
 							))}
 						</SelectContent>
 					</Select>
-
 				);
 			case 'connected':
 				return (
@@ -89,7 +106,12 @@ export default function DataHandlerFormItem<T extends object>({
 				return <Input type="text" {...field} />;
 		}
 	};
-
+	const [dependency1, setDependency1] = useState();
+	const [dependency2, setDependency2] = useState();
+	useEffect(() => {
+		// This is the callback function that will be executed when the component mounts or when the dependencies change.
+	  }, [dependency1, dependency2]); // This is an optional dependency array.
+	
 	return (
 		<FormField
 			control={form.control}

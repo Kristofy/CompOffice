@@ -26,6 +26,17 @@ interface DataHandlerTableProps<T extends object> {
 	setList?: (list: (T & Record<string, any>)[]) => void;
 }
 
+/**
+ * Renders a data handler table component with filtering, sorting, and display functionalities.
+ *
+ * @param {DataHandlerTableProps<T>} dataHandler - The data handler configuration for the table.
+ * @param {Function} onRowClick - The function to execute when a row is clicked.
+ * @param {ContextMenuField[]} contextMenuFields - The list of context menu fields.
+ * @param {boolean} optimisticUpdate - Flag indicating if optimistic updates are enabled.
+ * @param {Function} handleSubmit - The function to handle form submission.
+ * @param {Function} setList - The function to set the list data.
+ * @return {JSX.Element} The rendered data handler table component.
+ */
 export default function DataHandlerTable<T extends object>({
 	dataHandler,
 	onRowClick,

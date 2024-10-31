@@ -43,6 +43,22 @@ type DataHandlerRowContextMenuProps<T extends object> = {
 	property: keyof T | string;
 };
 
+/**
+ * Renders a DataHandlerList component that displays a list of data rows with dynamic row calculation based on user interaction.
+ *
+ * The component is designed to be used with a DataHandler that is capable of providing the component with the necessary data to be displayed
+ * in the list.
+ *
+ * The component takes the following props:
+ *  @param {RowFunction<T>} row - Function to calculate the individual rows in the list
+ *  @param {(T & Record<string, any>)[]} data - Array of data rows to be displayed
+ *  @param {DataHandler<T>} dataHandler - Data handler for manipulating the data
+ *  @param {number} size - Height of each row in pixels
+ *  @param {Record<keyof T | string, boolean>} hiddenColumns - Object containing keys of hidden columns
+ *  @param {(data: T & Record<string, any>, index: number) => void} onRowClick - Function to handle row click events
+ *  @param {ContextMenuField<T>[]} contextMenuFields - Array of context menu fields to be displayed
+ * @return {void}
+ */
 export default function DataHandlerList<T extends object>({
 	row,
 	data,
@@ -54,6 +70,13 @@ export default function DataHandlerList<T extends object>({
 }: DataHandlerListProps<T>) {
 	const [optimizationLevel, setOptimizationLevel] = useState<'None' | 'Pre1' | 'Pre2'>('None');
 
+	/**
+	 * calculateRow - Function to calculate a single row in the list
+	 * @param {Record<string | keyof T, React.ReactNode>} currentElement - The element to be displayed in the row
+	 * @param {T & Record<string, any>} currentValue - The data that the row is based on
+	 * @param {number} index - The index of the row in the list
+	 * @return {React.ReactNode} - The calculated row
+	 */
 	const calculateRow = useCallback(
 		(
 			currentElement: Record<string | keyof T, React.ReactNode>,
@@ -83,16 +106,20 @@ export default function DataHandlerList<T extends object>({
 	);
 
 	/**
-	 * Row Calculation: There are 3 states
-	 * 1. While actively typing then the row is calculated on the fly
-	 * 2. When the user stops typing then the row is precomputed after some set time
-	 * 3. When there is no change for a while then the whole list is precomputed
+	 * preComputedRowProps - This is a ref to the precomputed props of the list items
+	 * It is used to store the precomputed props while the user is actively typing
 	 */
-
 	const preComputedRowProps = useRef<Record<keyof T | string, React.ReactNode>[] | null>(null);
 
+	/**
+	 * preComputedRows - This is a ref to the precomputed rows of the list
+	 * It is used to store the precomputed rows while the user is actively typing
+	 */
 	const preComputedRows = useRef<React.ReactNode[] | null>(null);
 
+	/**
+	 * This effect is used to precompute the list item props after a few seconds of the user not actively typing
+	 */
 	useEffect(() => {
 		setOptimizationLevel('None');
 		preComputedRowProps.current = null;
@@ -100,6 +127,11 @@ export default function DataHandlerList<T extends object>({
 
 		// after a few seconds precompute the list item props
 		let inner_timeout: NodeJS.Timeout | null = null;
+		
+		/**
+		 * Sets a timeout to precompute the list item props after a few seconds.
+		 * This is done to reduce the amount of work done while the user is actively typing.
+		 */
 		const timeout = setTimeout(() => {
 			preComputedRowProps.current = data.map((current, index) => {
 				return row({ data: current, index });
@@ -127,7 +159,11 @@ export default function DataHandlerList<T extends object>({
 		};
 	}, [calculateRow, data, row]);
 
-	// TOOD(Krisotfy): Why is this not a state?
+	/**
+	 * Row - This is a function that is used to calculate a single row in the list
+	 * @param {{ index: number }} props - The props of the row
+	 * @return {React.ReactNode} - The calculated row
+	 */	
 	const Row = ({ index }: { index: number }) => {
 		if (optimizationLevel === 'Pre2' && preComputedRows.current) {
 			return preComputedRows.current[index];
@@ -141,14 +177,18 @@ export default function DataHandlerList<T extends object>({
 		return calculateRow(row({ data: data[index], index }), data[index], index);
 	};
 
+	/**
+	 * columnLayout - This is a memoized function that is used to calculate the column layout
+	 * @return {JSX.Element} - The calculated column layout
+	 */
 	const columnLayout = useMemo(() => {
 		console.log('recalculated layout');
 		return dataHandler.form.getColumnLayout(hiddenColumns);
 	}, [dataHandler, hiddenColumns]);
 
 	/**
-	 * overscanCount: While actively typeing then the overscan count is 1
-	 * When the user stops typing then the overscan count is 7
+	 * overscanCount - This is the number of extra rows that are rendered outside of the visible area
+	 * It is used to improve the performance of the list by reducing the amount of work done when the user scrolls
 	 */
 	const [overscan, setOverscan] = useState(1);
 	useEffect(() => {
@@ -160,11 +200,21 @@ export default function DataHandlerList<T extends object>({
 		return () => clearTimeout(timeout);
 	}, [data]);
 
+	/**
+	 * contextMenuContent - This is a state that is used to store the content of the context menu
+	 * @type {React.ReactNode | null}
+	 */
 	const [contextMenuContent, setContextMenuContent] = useState<React.ReactNode | null>(null);
 
+	/**
+	 * handleContext - This is a function that is used to handle the context menu
+	 * @param {number} index - The index of the row in the list
+	 * @param {number} colIndex - The index of the column in the list
+	 * @return {void}
+	 */
 	const handleContext = useCallback(
 		(index: number, colIndex: number) => {
-			// set key to the colIndex th key of the datas wisible keys
+			// set key to the colIndex th key of the data's visible keys
 			const visibleKeys = Object.entries<FormProps<T & Record<string, any>, any, 'All'>>(
 				dataHandler.columns.all.props
 			)
@@ -192,6 +242,14 @@ export default function DataHandlerList<T extends object>({
 		[contextMenuFields, data, dataHandler, hiddenColumns]
 	);
 
+	
+	console.log('Hi there!');
+
+	/**
+	 * handleRowClick - This is a function that is used to handle the row click event
+	 * @param {number} index - The index of the row in the list
+	 * @return {void}
+	 */
 	const handleRowClick = useCallback(
 		(index: number) => {
 			onRowClick?.(data[index], index);
@@ -201,28 +259,3 @@ export default function DataHandlerList<T extends object>({
 
 	return (
 		<>
-			<div className="block w-full h-full m-0">
-				<AutoResizer>
-					{({ height, width }) => (
-						<ContextMenu>
-							<ContextMenuTrigger>
-								<VirtualTable
-									height={height - 60}
-									width={width}
-									itemCount={data.length}
-									itemSize={size}
-									overscanCount={overscan}
-									onContextMenu={handleContext}
-									onRowClick={handleRowClick}
-									columnLayout={<colgroup>{columnLayout}</colgroup>}
-									row={Row}
-								/>
-							</ContextMenuTrigger>
-							{contextMenuContent}
-						</ContextMenu>
-					)}
-				</AutoResizer>
-			</div>
-		</>
-	);
-}

@@ -17,7 +17,8 @@ body {
 }
 
 @layer base {
-	/* Default theme */
+	/* Default Dark theme */
+	html[data-theme='dark'],
 	:root {
 		--background: #010409;
 		--foreground: #e6edf3;
@@ -41,30 +42,6 @@ body {
 		--ring: #262b32;
 
 		--radius: 0.5rem;
-	}
-
-	/* Dark theme */
-	html[data-theme='dark'] {
-		--background: #010409;
-		--foreground: #e6edf3;
-
-		--card: #21262d;
-
-		--popover: #21262d;
-
-		--primary: #010409;
-
-		--secondary: #0d1117;
-
-		--muted: #161b22;
-
-		--accent: #292f36;
-
-		--destructive: #881a1b;
-
-		--border: #262b32;
-		--input: #262b32;
-		--ring: #262b32;
 	}
 
 	/* Light theme */

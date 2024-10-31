@@ -17,6 +17,7 @@ import { PopoverClose } from '@radix-ui/react-popover';
 import { DataHandler, FormProps, TableOrder } from '../../type-info';
 import FilterItem from './filter-item';
 
+
 interface HeaderItemProps<T extends object> {
 	dataHandler: DataHandler<T>;
 	props: FormProps<T & Record<string, any>, any, 'All'>;
@@ -36,6 +37,9 @@ interface HeaderItemProps<T extends object> {
 	) => void;
 	index: number;
 }
+
+
+
 
 export default function HeaderItem<T extends object>({
 	dataHandler,

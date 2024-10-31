@@ -1,10 +1,11 @@
 ### Visszalépés
 
 
+#### A felhasználó visszalép az előző oldalra
 
-**A felhasználó visszalép az előző oldalra**  
+_Given_ A felhasználó bejelentkezett
 
-_Given_ A felhasználó bejelentkezett AND Egy tetszőleges A oldalt majd B oldalt meglátogatott
+_Given_ Egy tetszőleges A oldalt majd B oldalt meglátogatott
 
 _When_ A felhasználó visszalép
 
